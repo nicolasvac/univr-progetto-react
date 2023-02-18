@@ -191,9 +191,9 @@ export default function MotivationalVideos({navigation}) {
     }
   };
 
-  const changeVideoPlayerTimeDirectly = newTime => {
+  const changeVideoPlayerTimeDirectly = newVideoTime => {
     // Verifica che il parametro inviato sia effettivamente un numero.
-    if (isNaN(newTime)) {
+    if (isNaN(newVideoTime)) {
       Alert.alert(
         'Errore',
         'Errore interno. Il tempo selezionato non è valido. Riprova.',
@@ -201,7 +201,7 @@ export default function MotivationalVideos({navigation}) {
       return;
     }
 
-    console.log('CAMBIO IL TEMPO DEL VIDEO IN', newTime);
+    console.log('CAMBIO IL TEMPO DEL VIDEO DIRETTO', newVideoTime);
 
     // Ottieni il riferimento al video player.
     const videoPlayer = getVideoPlayerRef();
@@ -214,8 +214,8 @@ export default function MotivationalVideos({navigation}) {
       return;
     }
 
-    videoPlayer.seekTo(newTime);
-    setVideoCurrentTime(newTime);
+    videoPlayer.seekTo(newVideoTime);
+    setVideoCurrentTime(newVideoTime);
   };
 
   const changeVideoLinkPlaying = async newVideoLink => {
@@ -304,7 +304,7 @@ export default function MotivationalVideos({navigation}) {
    * Questa funzione viene utilizzata per gestire gli stati del video player.
    * Al cambio di alcuni stati, viene fatto partire / viene fermato il timer
    * per tenere traccia del tempo corrente del video.
-   * @param state
+   * @param {string} state
    */
   const videoPlayerOnChangeState = state => {
     console.log('CAMBIO STATE DEL VIDEO PLAYER', state);
@@ -350,7 +350,9 @@ export default function MotivationalVideos({navigation}) {
               onLongPress={() => {
                 // handle or ignore
               }}>
+              {/* Blocca qualsiasi tipologia di tocco in input sul video */}
               <View pointerEvents="none">
+                {/* Includi il video player di youtube */}
                 <YoutubePlayer
                   ref={videoPlayerRef}
                   height={videoPlayerHeight}
@@ -363,11 +365,15 @@ export default function MotivationalVideos({navigation}) {
               </View>
             </Pressable>
           </View>
+          {/* Includi i controlli tramite slider */}
           <VideoTimeSlider
             videoCurrentTime={videoCurrentTime}
             videoTotalTime={videoTotalTime}
-            onValueChange={value => changeVideoPlayerTimeDirectly(value)}
+            onValueChange={percentage =>
+              changeVideoPlayerTimeDirectly(percentage)
+            }
           />
+          {/* Includi i controlli tramite bottoni interattivi */}
           <VideoControls
             isPlaying={playing}
             isMuted={isMuted}
@@ -436,32 +442,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 300,
   },
-  cardTitle: {
-    color: color.black,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  itemContent: {
-    marginTop: 18,
-    backgroundColor: color.white,
-  },
-  itemTextLong: {
-    color: color.black,
-  },
-  itemTextShort: {
-    color: color.black,
-  },
-  itemIcon: {
-    width: 8,
-    height: 8,
-    color: color.black,
-    marginTop: 7,
-  },
-  itemIconPlay: {
-    width: 25,
-    height: 25,
-    color: color.black,
-  },
   containerVideo: {
     padding: 3,
     backgroundColor: color.black,
@@ -469,21 +449,5 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     borderColor: color.gray,
     borderWidth: 1,
-  },
-
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  row: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-    marginBottom: 5,
-    color: color.black,
-    backgroundColor: color.black,
   },
 });

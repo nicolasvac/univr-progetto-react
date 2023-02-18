@@ -29,7 +29,9 @@ function VideoTimeSlider(props) {
 
   return (
     <View style={styles.row}>
+      {/* Visualizza il tempo corrente del video */}
       <Text style={styles.currentTime}>{currentTimeText}</Text>
+      {/* Visualizza lo slider aggiornato in base al tempo corrente */}
       <Slider
         style={styles.timeSlider}
         minimumValue={minTime}
@@ -38,13 +40,19 @@ function VideoTimeSlider(props) {
         maximumValue={totalTime}
         value={internalValueChange}
         onValueChange={value => {
-          console.log('CAMBIO LO SLIDER IN ', value);
-          internalValueChange = Math.round(value);
+          console.log('CAMBIAMENTO VALORE SLIDER ', value);
+          internalValueChange = value;
         }}
         onSlidingComplete={value => {
+          // Aggiorna la percentuale di completamento solamente a fine slide, così da non intasare il listener
+          console.log(
+            'CAMBIO AVANZAMENTO VIDEO TRAMITE SLIDER',
+            internalValueChange,
+          );
           props.onValueChange(internalValueChange);
         }}
       />
+      {/* Visualizza il tempo totale del video */}
       <Text style={styles.totalTime}>{totalTimeText}</Text>
     </View>
   );
