@@ -6,7 +6,9 @@ import {Divider} from 'react-native-elements';
 import React from 'react';
 
 function ItemList(props) {
+  // Estrai props per leggibilità
   const videoItem = props.item;
+  const isCurrentlyPlayed = props.isCurrentlyPlayed;
 
   return (
     <>
@@ -26,7 +28,14 @@ function ItemList(props) {
                 props.onPress(videoItem.link);
               }}
               android_ripple={{color: color.lightBlue, borderless: true}}>
-              <Play style={styles.itemIconPlay} />
+              {/* Facciamo diventare verde l'icona se il video è in riproduzione */}
+              <Play
+                style={
+                  isCurrentlyPlayed
+                    ? styles.itemIconPlaying
+                    : styles.itemIconNotPlaying
+                }
+              />
             </Pressable>
           </View>
         </View>
@@ -53,10 +62,15 @@ const styles = StyleSheet.create({
     color: color.black,
     marginTop: 7,
   },
-  itemIconPlay: {
+  itemIconNotPlaying: {
     width: 25,
     height: 25,
     color: color.black,
+  },
+  itemIconPlaying: {
+    width: 25,
+    height: 25,
+    color: color.iconGreen,
   },
 });
 

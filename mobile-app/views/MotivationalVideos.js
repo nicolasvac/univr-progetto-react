@@ -247,7 +247,7 @@ export default function MotivationalVideos({navigation}) {
   const renderItemList = ({item, index}) => (
     <ItemList
       item={item}
-      isCurrentlyPlayed={() => item.link === currentVideoLink}
+      isCurrentlyPlayed={item.link === currentVideoLink}
       onPress={link => {
         console.log('CAMBIO VIDEO IN', link);
         changeVideoLinkPlaying(link);
@@ -314,13 +314,13 @@ export default function MotivationalVideos({navigation}) {
           <Pressable
             onPress={() => navigation.openDrawer()}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Hamburger style={styles.topBarIcon}/>
+            <Hamburger style={styles.topBarIcon} />
           </Pressable>
           <Text style={styles.topBarText}>{t('nav:motivationalvideos')}</Text>
           <Pressable
             onPress={toggleOverlayLogOut}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Logout style={styles.topBarIcon}/>
+            <Logout style={styles.topBarIcon} />
           </Pressable>
         </View>
 

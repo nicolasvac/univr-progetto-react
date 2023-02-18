@@ -4,7 +4,7 @@ import React from 'react';
 import colors from '../../../color';
 
 function VideoTimeSlider(props) {
-  // Estrai le proprietà in maniera leggibile da props
+  // Estrai le props per leggibilità
   let minTime = 0;
   let totalTime = props.videoTotalTime;
   let currentTime = props.videoCurrentTime;

@@ -17,6 +17,7 @@ function VideoControls(props) {
     <View style={styles.row}>
       <Pressable
         onPress={() => {
+          // Comunica alla vista superiore di mutare / smutare il video.
           props.onVideoMuteChange(!isMuted);
         }}
         android_ripple={{color: color.edalabBlue, borderless: false}}
@@ -34,6 +35,7 @@ function VideoControls(props) {
       </Pressable>
       <Pressable
         onPress={() => {
+          // Comunica alla vista superiore di andare indietro di 10 secondi.
           props.onVideoTimeChange(-10);
         }}
         android_ripple={{color: color.edalabBlue, borderless: false}}
@@ -43,10 +45,11 @@ function VideoControls(props) {
         padding={5}
         alignItems={'center'}
         margin={10}>
-        <BackwardIcon height={'25'} width={'40'} fill={'black'} />
+        <BackwardIcon height={'25'} width={'40'} />
       </Pressable>
       <Pressable
         onPress={() => {
+          // Comunica alla vista superiore di avviare / stoppare il video player.
           props.onPlayingChange(!isPlaying);
         }}
         android_ripple={{color: color.edalabBlue, borderless: false}}
@@ -64,6 +67,7 @@ function VideoControls(props) {
       </Pressable>
       <Pressable
         onPress={() => {
+          // Comunica alla vista superiore di andare avanti di 10 secondi.
           props.onVideoTimeChange(+10);
         }}
         android_ripple={{color: color.edalabBlue, borderless: false}}
@@ -73,7 +77,7 @@ function VideoControls(props) {
         padding={5}
         alignItems={'center'}
         margin={10}>
-        <ForwardIcon height={'25'} width={'40'} fill={'white'} />
+        <ForwardIcon height={'25'} width={'40'} />
       </Pressable>
     </View>
   );
