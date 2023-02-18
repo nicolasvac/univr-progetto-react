@@ -306,13 +306,18 @@ export default function MotivationalVideos({navigation}) {
    */
   const startCurrentTimeInterval = () => {
     // Non far partire un altro intervallo se già presente.
-    if (videoCurrentTimeInterval != null || !isVideoPlayerAvailable()) {
+    if (videoCurrentTimeInterval != null) {
       console.log('AVVIO TIMER RICHIESTO MA GIA AVVIATO.');
       return;
     }
 
     console.log('AVVIO IL TIMER PER IL TEMPO CORRENTE DEL VIDEO');
     videoCurrentTimeInterval = setInterval(async () => {
+      // Assicurati che il video player sia presente.
+      if (!isVideoPlayerAvailable()) {
+        return;
+      }
+
       setVideoCurrentTime(await getVideoPlayerRef().getCurrentTime());
     }, 1000);
   };
@@ -378,7 +383,10 @@ export default function MotivationalVideos({navigation}) {
               }}>
               {/* Blocca qualsiasi tipologia di tocco in input sul video */}
               <View pointerEvents="none">
-                {/* Includi il video player di youtube */}
+                {/*
+                Includi il video player di youtube.
+                Al player viene chiesto di disabilitare i controlli a schermo e il branding di youtube.
+                */}
                 <YoutubePlayer
                   ref={videoPlayerRef}
                   height={videoPlayerHeight}
