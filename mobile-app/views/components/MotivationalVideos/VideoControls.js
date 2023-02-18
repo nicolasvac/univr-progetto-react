@@ -27,9 +27,9 @@ function VideoControls(props) {
         alignItems={'center'}
         margin={10}>
         {isMuted ? (
-          <MuteIcon height={'25'} width={'40'} fill={'white'}/>
+          <MuteIcon height={'25'} width={'40'} fill={'black'} />
         ) : (
-          <UnmuteIcon height={'25'} width={'40'} fill={'white'}/>
+          <UnmuteIcon height={'25'} width={'40'} fill={'black'} />
         )}
       </Pressable>
       <Pressable
@@ -43,7 +43,7 @@ function VideoControls(props) {
         padding={5}
         alignItems={'center'}
         margin={10}>
-        <BackwardIcon height={'25'} width={'40'} fill={'white'} />
+        <BackwardIcon height={'25'} width={'40'} fill={'black'} />
       </Pressable>
       <Pressable
         onPress={() => {
@@ -57,9 +57,9 @@ function VideoControls(props) {
         alignItems={'center'}
         margin={10}>
         {isPlaying ? (
-          <PauseIcon height={'25'} width={'40'} fill={'white'}/>
+          <PauseIcon height={'25'} width={'40'} fill={'black'}/>
         ) : (
-          <PlayIcon height={'25'} width={'40'} fill={'white'}/>
+          <PlayIcon height={'25'} width={'40'} fill={'black'}/>
         )}
       </Pressable>
       <Pressable
