@@ -137,10 +137,9 @@ export default function MotivationalVideos({navigation}) {
 
   /**
    * Consente di cambiare il tempo di riproduzione del video.
-   * @param time Tempo di cui andare avanti o indietro in secondi.
-   * @returns {Promise<void>}
+   * @param {number} time Tempo di cui andare avanti o indietro in secondi (es: +5, -10).
    */
-  const changeVideoPlayerTimeIncrementally = async time => {
+  const changeVideoPlayerTimeIncrementally = time => {
     // Verifica che il parametro inviato sia effettivamente un numero.
     if (isNaN(time)) {
       Alert.alert(t('error:generic'), t('error:wrongVideoTime'));
@@ -157,12 +156,50 @@ export default function MotivationalVideos({navigation}) {
       return;
     }
 
-    // Ottieni il tempo corrente del video (in secondi)
-    const currentVideoTime = await videoPlayer.getCurrentTime();
+    // Calcola il nuovo tempo a cui mandare il player a partire dal tempo corrente
+    const newVideoTime = videoCurrentTime + time;
 
-    // Calcola il nuovo tempo a cui mandare il player
-    const newVideoTime = currentVideoTime + time;
+    // Invoca il cambio del tempo del video sul player.
+    changeVideoTime(videoPlayer, newVideoTime);
+  };
 
+  /**
+   * Questa funzione permette di cambiare il tempo del video
+   * in riproduzione direttamente.
+   * @param {number} newVideoTime Il tempo in secondi a cui far andare il video (es: 210)
+   */
+  const changeVideoPlayerTimeDirectly = newVideoTime => {
+    // Verifica che il parametro inviato sia effettivamente un numero.
+    if (isNaN(newVideoTime)) {
+      Alert.alert(t('error:generic'), t('error:wrongVideoTime'));
+      return;
+    }
+
+    console.log('CAMBIO IL TEMPO DEL VIDEO DIRETTO', newVideoTime);
+
+    // Ottieni il riferimento al video player.
+    const videoPlayer = getVideoPlayerRef();
+
+    if (videoPlayer == null) {
+      Alert.alert(t('error:generic'), t('error:videoPlayerNotReady'));
+      return;
+    }
+
+    // Invoca il cambio del tempo del video sul player.
+    changeVideoTime(videoPlayer, newVideoTime);
+  };
+
+  /**
+   * Questa funzione agisce direttamente sul video player passato come referenza.
+   * Imposta il tempo corrente del video player come il parametro specificato.
+   * Questa funzione viene usata internamente, per tanto si sconsiglia l'uso diretto,
+   * e si consiglia invece l'uso dei due metodi proposti sotto.
+   * @see changeVideoPlayerTimeDirectly
+   * @see changeVideoPlayerTimeIncrementally
+   * @param {YoutubeIframeRef} videoPlayer Il video player su cui modificare il tempo
+   * @param {number} newVideoTime Secondi a cui mandare il video (es: 210)
+   */
+  const changeVideoTime = (videoPlayer, newVideoTime) => {
     if (newVideoTime >= videoTotalTime) {
       // Se il nuovo tempo a cui mandare il player supera la durata totale del video,
       // procediamo a far terminare il video direttamente.
@@ -183,27 +220,6 @@ export default function MotivationalVideos({navigation}) {
       videoPlayer.seekTo(newVideoTime);
       setVideoCurrentTime(0);
     }
-  };
-
-  const changeVideoPlayerTimeDirectly = newVideoTime => {
-    // Verifica che il parametro inviato sia effettivamente un numero.
-    if (isNaN(newVideoTime)) {
-      Alert.alert(t('error:generic'), t('error:wrongVideoTime'));
-      return;
-    }
-
-    console.log('CAMBIO IL TEMPO DEL VIDEO DIRETTO', newVideoTime);
-
-    // Ottieni il riferimento al video player.
-    const videoPlayer = getVideoPlayerRef();
-
-    if (videoPlayer == null) {
-      Alert.alert(t('error:generic'), t('error:videoPlayerNotReady'));
-      return;
-    }
-
-    videoPlayer.seekTo(newVideoTime);
-    setVideoCurrentTime(newVideoTime);
   };
 
   /**
@@ -256,7 +272,7 @@ export default function MotivationalVideos({navigation}) {
       item={item}
       isCurrentlyPlayed={item.link === currentVideoLink}
       onPress={link => {
-        console.log('CAMBIO VIDEO IN', link);
+        console.log('VIDEO INDICE', index, 'CAMBIO VIDEO IN', link);
         changeVideoLinkPlaying(link);
       }}
     />
@@ -264,7 +280,7 @@ export default function MotivationalVideos({navigation}) {
 
   // Calcola dinamicamente l'altezza del video player.
   // Teniamo sempre un minimo di 200px come richiesto da specifiche della libreria.
-  // Se possibile, 1/4 dell'altezza rende il player carino.
+  // Se possibile, un quarto dell'altezza rende il player carino.
   const videoPlayerHeight = Math.min(Dimensions.get('screen').height / 4, 200);
 
   /**
