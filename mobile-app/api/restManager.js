@@ -46,6 +46,7 @@ export const get = async (api) => {
     try {
         const conf = await getConfiguration()
         const res = await axios.get(url, conf)
+        console.log('RISPOSTA GET', res.status, res.statusText, res.data);
         return res.data
     } catch (err) {
         console.log("$$ DBG get error", Object.keys(err), err.config, err.request, err.response)
@@ -58,6 +59,7 @@ export const post = async (api, body) => {
     try {
         const conf = await getConfiguration()
         const res = await axios.post(url, body, conf)
+        console.log('RISPOSTA POST', res.status, res.statusText, res.data);
         return res.data
     } catch (err) {
         console.log("$$ DBG post error", Object.keys(err), err.config, err.request, err.response)
@@ -82,6 +84,7 @@ export const login = async (email, password) => {
     try {
         const conf = await getConfiguration()
         const res = await axios.get(url, conf)
+        console.log('RISPOSTA LOGIN', res.status, res.statusText, res.data);
 
         const {token, refresh_token, expiry} = res.data
         // console.log("$$$$LOgin token ", token)
