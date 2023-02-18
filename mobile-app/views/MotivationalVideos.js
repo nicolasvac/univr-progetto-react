@@ -19,7 +19,7 @@ import Dot from '../icons/dry-clean.svg';
 import {useTranslation} from 'react-i18next';
 
 import YoutubePlayer from 'react-native-youtube-iframe';
-import {get} from '../api/restManager';
+import {get, logout} from '../api/restManager';
 import LogoutOverlay from '../components/LogoutOverlay';
 
 export default function MotivationalVideos({navigation}) {
@@ -36,6 +36,12 @@ export default function MotivationalVideos({navigation}) {
     getData();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await logout((navigation = {navigation}));
+    } catch (err) {}
+  };
+
   async function getData() {
     try {
       let data = await get('/multimedia');
@@ -47,15 +53,16 @@ export default function MotivationalVideos({navigation}) {
     } catch (error) {
       // There was an error on the native side
       console.log('$$ DBG MotivationalVideos getData error', error);
-      if (err && err.toString().includes('Signature has expired')) {
-        handleLogout();
+      if (error && error.toString().includes('Signature has expired')) {
+        await handleLogout();
       }
     }
   }
-  const setData = ({videos}) => {
+
+  const setData = ({videosData}) => {
     let d0 = [];
 
-    videos.forEach(element => {
+    videosData.forEach(element => {
       let new_item = {
         id: element.id,
         link: element.video_link,
@@ -66,7 +73,7 @@ export default function MotivationalVideos({navigation}) {
       d0.push(new_item);
     });
     // console.log("$$List", d0)
-    d0[0].link.split('/')[2] == 'youtu.be'
+    d0[0].link.split('/')[2] === 'youtu.be'
       ? setVideoId(d0[0].link.split('/')[3])
       : setVideoId(d0[0].link.split('v=')[1]);
     setVideos(d0);
@@ -91,7 +98,7 @@ export default function MotivationalVideos({navigation}) {
             <Text style={styles.itemTextLong}>{title}</Text>
             <Pressable
               onPress={() => {
-                link.split('/')[2] == 'youtu.be'
+                link.split('/')[2] === 'youtu.be'
                   ? setVideoId(link.split('/')[3])
                   : setVideoId(link.split('v=')[1]);
                 setPlaying(true);
