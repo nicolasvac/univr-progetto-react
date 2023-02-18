@@ -384,6 +384,10 @@ export default function MotivationalVideos({navigation}) {
                   videoId={videoId}
                   onReady={videoPlayerReadyEvent}
                   onChangeState={state => videoPlayerOnChangeState(state)}
+                  initialPlayerParams={{
+                    controls: false,
+                    modestbranding: true,
+                  }}
                 />
               </View>
             </Pressable>
