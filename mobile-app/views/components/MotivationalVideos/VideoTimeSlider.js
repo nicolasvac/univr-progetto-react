@@ -12,20 +12,23 @@ function VideoTimeSlider(props) {
   let totalTimeText =
     totalTime != null
       ? new Date(totalTime * 1000).toISOString().slice(11, 19)
-      : '00:00:00';
+      : '00:00';
   let currentTimeText =
     currentTime != null
       ? new Date(currentTime * 1000).toISOString().slice(11, 19)
-      : '00:00:00';
-
-  // All'inizio del caricamento entrambi i valori sono a zero, quindi nascondiamo lo slider.
+      : '00:00';
 
   // Tieni una variabile per mantenere traccia di dove salta il video.
   let internalValueChange = currentTime;
 
+  // Nascondi lo slider se non abbiamo nessun valore.
+  if (currentTime === 0 && totalTime === 0) {
+    return <View />;
+  }
+
   return (
     <View style={styles.row}>
-      <Text style={styles.timeTexts}>{currentTimeText}</Text>
+      <Text style={styles.currentTime}>{currentTimeText}</Text>
       <Slider
         style={styles.timeSlider}
         minimumValue={minTime}
@@ -39,24 +42,34 @@ function VideoTimeSlider(props) {
           props.onValueChange(internalValueChange);
         }}
       />
-      <Text style={styles.timeTexts}>{totalTimeText}</Text>
+      <Text style={styles.totalTime}>{totalTimeText}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  timeTexts: {
+  currentTime: {
     color: 'black',
     fontSize: 16,
     flex: 1,
-    marginHorizontal: 10,
+    marginLeft: 10,
+    marginRight: 5,
+  },
+  totalTime: {
+    color: 'black',
+    fontSize: 16,
+    flex: 1,
+    marginRight: 10,
+    marginLeft: 5,
   },
   timeSlider: {
     flex: 3,
   },
   row: {
+    alignItems: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'center',
   },
 });
 

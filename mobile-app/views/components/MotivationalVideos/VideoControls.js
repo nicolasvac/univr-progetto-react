@@ -1,17 +1,23 @@
 import color from '../../../color';
-import Pause from '../../../icons/pause.svg';
-import Play from '../../../icons/play.svg';
+import PauseIcon from '../../../icons/pause.svg';
+import PlayIcon from '../../../icons/play.svg';
+import ForwardIcon from '../../../icons/forward-10-seconds.svg';
+import BackwardIcon from '../../../icons/backward-10-seconds.svg';
+import MuteIcon from '../../../icons/mute.svg';
+import UnmuteIcon from '../../../icons/unmute.svg';
 import {Pressable, StyleSheet, View} from 'react-native';
 import React from 'react';
 
 function VideoControls(props) {
+  // Estrai le props per leggibilità
   const isPlaying = props.isPlaying;
+  const isMuted = props.isMuted;
 
   return (
     <View style={styles.row}>
       <Pressable
         onPress={() => {
-          props.onVideoTimeChange(-5);
+          props.onVideoMuteChange(!isMuted);
         }}
         android_ripple={{color: color.edalabBlue, borderless: false}}
         backgroundColor={color.lightBlue}
@@ -20,11 +26,24 @@ function VideoControls(props) {
         padding={5}
         alignItems={'center'}
         margin={10}>
-        {isPlaying ? (
-          <Pause height={'25'} width={'40'} fill={'white'}/>
+        {isMuted ? (
+          <MuteIcon height={'25'} width={'40'} fill={'white'}/>
         ) : (
-          <Play height={'25'} width={'40'} fill={'white'}/>
+          <UnmuteIcon height={'25'} width={'40'} fill={'white'}/>
         )}
+      </Pressable>
+      <Pressable
+        onPress={() => {
+          props.onVideoTimeChange(-10);
+        }}
+        android_ripple={{color: color.edalabBlue, borderless: false}}
+        backgroundColor={color.lightBlue}
+        borderRadius={7}
+        width={60}
+        padding={5}
+        alignItems={'center'}
+        margin={10}>
+        <BackwardIcon height={'25'} width={'40'} fill={'white'} />
       </Pressable>
       <Pressable
         onPress={() => {
@@ -38,14 +57,14 @@ function VideoControls(props) {
         alignItems={'center'}
         margin={10}>
         {isPlaying ? (
-          <Pause height={'25'} width={'40'} fill={'white'}/>
+          <PauseIcon height={'25'} width={'40'} fill={'white'}/>
         ) : (
-          <Play height={'25'} width={'40'} fill={'white'}/>
+          <PlayIcon height={'25'} width={'40'} fill={'white'}/>
         )}
       </Pressable>
       <Pressable
         onPress={() => {
-          props.onVideoTimeChange(+5);
+          props.onVideoTimeChange(+10);
         }}
         android_ripple={{color: color.edalabBlue, borderless: false}}
         backgroundColor={color.lightBlue}
@@ -54,11 +73,7 @@ function VideoControls(props) {
         padding={5}
         alignItems={'center'}
         margin={10}>
-        {isPlaying ? (
-          <Pause height={'25'} width={'40'} fill={'white'}/>
-        ) : (
-          <Play height={'25'} width={'40'} fill={'white'}/>
-        )}
+        <ForwardIcon height={'25'} width={'40'} fill={'white'} />
       </Pressable>
     </View>
   );
@@ -66,6 +81,8 @@ function VideoControls(props) {
 
 const styles = StyleSheet.create({
   row: {
+    alignItems: 'center',
+    justifyContent: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
   },

@@ -39,6 +39,7 @@ export default function MotivationalVideos({navigation}) {
   const [playing, setPlaying] = useState(false);
   const [videoId, setVideoId] = useState('');
   const [videos, setVideos] = useState([]);
+  const [isMuted, setIsMuted] = useState(false);
   const [videoTotalTime, setVideoTotalTime] = useState(0);
   const [videoCurrentTime, setVideoCurrentTime] = useState(0);
   const [currentVideoLink, setCurrentVideoLink] = useState(0);
@@ -339,6 +340,7 @@ export default function MotivationalVideos({navigation}) {
                   ref={videoPlayerRef}
                   height={videoPlayerHeight}
                   play={playing}
+                  mute={isMuted}
                   videoId={videoId}
                   onReady={videoPlayerReadyEvent}
                   onChangeState={state => videoPlayerOnChangeState(state)}
@@ -351,18 +353,15 @@ export default function MotivationalVideos({navigation}) {
             videoTotalTime={videoTotalTime}
             onValueChange={value => changeVideoPlayerTimeDirectly(value)}
           />
-          <View
-            style={{
-              alignItems: 'center',
-            }}>
-            <VideoControls
-              isPlaying={playing}
-              onPlayingChange={newIsPlaying => setPlaying(newIsPlaying)}
-              onVideoTimeChange={newTime =>
-                changeVideoPlayerTimeIncrementally(newTime)
-              }
-            />
-          </View>
+          <VideoControls
+            isPlaying={playing}
+            isMuted={isMuted}
+            onVideoMuteChange={newIsMuted => setIsMuted(newIsMuted)}
+            onPlayingChange={newIsPlaying => setPlaying(newIsPlaying)}
+            onVideoTimeChange={newTime =>
+              changeVideoPlayerTimeIncrementally(newTime)
+            }
+          />
           {/* VIDEO LIST */}
           <View style={styles.card}>
             <SafeAreaView style={styles.contentCardContainer}>
