@@ -206,7 +206,13 @@ export default function MotivationalVideos({navigation}) {
     setVideoCurrentTime(newVideoTime);
   };
 
-  const changeVideoLinkPlaying = async newVideoLink => {
+  /**
+   * Questa funzione consente di cambiare il video in esecuzione,
+   * passando come parametro un nuovo link di youtube completo.
+   * La funzione provvederà a estrarre il l'id del video automaticamente.
+   * @param {string} newVideoLink
+   */
+  const changeVideoLinkPlaying = newVideoLink => {
     setCurrentVideoLink(newVideoLink);
 
     const newVideoId =
