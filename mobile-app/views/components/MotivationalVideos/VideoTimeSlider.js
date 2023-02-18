@@ -40,7 +40,6 @@ function VideoTimeSlider(props) {
         maximumValue={totalTime}
         value={internalValueChange}
         onValueChange={value => {
-          console.log('CAMBIAMENTO VALORE SLIDER ', value);
           internalValueChange = value;
         }}
         onSlidingComplete={value => {
