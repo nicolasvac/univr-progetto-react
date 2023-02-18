@@ -200,17 +200,17 @@ export default function MotivationalVideos({navigation}) {
    * @param {number} newVideoTime Secondi a cui mandare il video (es: 210)
    */
   const changeVideoTime = (videoPlayer, newVideoTime) => {
-    if (newVideoTime >= videoTotalTime) {
+    if (newVideoTime >= videoTotalTime - 2) {
+      // Viene utilizzato un -2 come margine di errore nel tocco.
       // Se il nuovo tempo a cui mandare il player supera la durata totale del video,
       // procediamo a far terminare il video direttamente.
+      // Il cambio di stato del player si occuperà di aggiornare il resto dei dati.
       videoPlayer.seekTo(videoTotalTime);
-      setPlaying(false);
-      setVideoCurrentTime(videoTotalTime);
     } else if (newVideoTime <= 0) {
       // Se il nuovo tempo a cui mandare il player è inferiore o uguale a zero,
       // facciamo ripartire il video dall'inizio.
       videoPlayer.seekTo(0);
-      setVideoCurrentTime(0);
+      //setVideoCurrentTime(0);
 
       if (!playing) {
         setPlaying(true);
@@ -218,7 +218,7 @@ export default function MotivationalVideos({navigation}) {
     } else {
       // Se nessuno dei casi precedenti è vero, semplicemente cambiamo il tempo del video.
       videoPlayer.seekTo(newVideoTime);
-      setVideoCurrentTime(0);
+      //setVideoCurrentTime(newVideoTime);
     }
   };
 
@@ -226,9 +226,12 @@ export default function MotivationalVideos({navigation}) {
    * Questa funzione consente di cambiare il video in esecuzione,
    * passando come parametro un nuovo link di youtube completo.
    * La funzione provvederà a estrarre il l'id del video automaticamente.
+   * A ogni cambio di video viene fatto partire il timer che monitora
+   * il tempo corrente del video.
    * @param {string} newVideoLink
    */
   const changeVideoLinkPlaying = newVideoLink => {
+    stopCurrentTimeInterval();
     setCurrentVideoLink(newVideoLink);
 
     const newVideoId =
@@ -237,8 +240,7 @@ export default function MotivationalVideos({navigation}) {
         : newVideoLink.split('v=')[1];
 
     setVideoId(newVideoId);
-    setVideoCurrentTime(0);
-    setPlaying(true);
+    startCurrentTimeInterval();
   };
 
   /**
@@ -249,12 +251,9 @@ export default function MotivationalVideos({navigation}) {
    * @returns {Promise<void>}
    */
   const videoPlayerReadyEvent = async () => {
-    stopCurrentTimeInterval();
     console.log('VIDEO PLAYER PRONTO');
     setVideoCurrentTime(0);
-    const newVideoTotalTime = Math.round(
-      await getVideoPlayerRef().getDuration(),
-    );
+    const newVideoTotalTime = await getVideoPlayerRef().getDuration();
     setVideoTotalTime(newVideoTotalTime);
     console.log('NUOVO TEMPO TOTALE VIDEO', newVideoTotalTime);
   };
@@ -289,7 +288,7 @@ export default function MotivationalVideos({navigation}) {
    */
   const startCurrentTimeInterval = () => {
     // Non far partire un altro intervallo se già presente.
-    if (videoCurrentTimeInterval != null) {
+    if (videoCurrentTimeInterval != null || !isVideoPlayerAvailable()) {
       console.log('AVVIO TIMER RICHIESTO MA GIA AVVIATO.');
       return;
     }
@@ -297,7 +296,7 @@ export default function MotivationalVideos({navigation}) {
     console.log('AVVIO IL TIMER PER IL TEMPO CORRENTE DEL VIDEO');
     videoCurrentTimeInterval = setInterval(async () => {
       setVideoCurrentTime(await getVideoPlayerRef().getCurrentTime());
-    }, 500);
+    }, 1000);
   };
 
   /**
@@ -312,22 +311,18 @@ export default function MotivationalVideos({navigation}) {
 
   /**
    * Questa funzione viene utilizzata per gestire gli stati del video player.
-   * Al cambio di alcuni stati, viene fatto partire / viene fermato il timer
-   * per tenere traccia del tempo corrente del video.
    * @param {string} state
    */
   const videoPlayerOnChangeState = state => {
     console.log('CAMBIO STATE DEL VIDEO PLAYER', state);
 
     switch (state) {
-      case 'buffering':
-      case 'paused':
       case 'ended':
-      case 'unstarted':
-        stopCurrentTimeInterval();
+        setPlaying(false);
+        setVideoCurrentTime(videoTotalTime);
         break;
       case 'playing':
-        startCurrentTimeInterval();
+        setPlaying(true);
         break;
     }
   };
