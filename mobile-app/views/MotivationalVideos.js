@@ -11,12 +11,10 @@ import {
   Dimensions,
 } from 'react-native';
 import color from '../color';
-import Hamburger from '../icons/hamburger.svg';
-import Logout from '../icons/logout.svg';
 
 import {useTranslation} from 'react-i18next';
 
-// teniamo l'import di YoutubeIframeRef per il commento sulla variabile e intellisense
+// Teniamo l'import di YoutubeIframeRef per il commento sulla variabile e intellisense
 // eslint-disable-next-line no-unused-vars
 import YoutubePlayer, {YoutubeIframeRef} from 'react-native-youtube-iframe';
 import {get, logout} from '../api/restManager';
@@ -24,8 +22,10 @@ import LogoutOverlay from '../components/LogoutOverlay';
 import ItemList from './components/MotivationalVideos/ItemList';
 import VideoTimeSlider from './components/MotivationalVideos/VideoTimeSlider';
 import VideoControls from './components/MotivationalVideos/VideoControls';
+import TopBar from './components/MotivationalVideos/TopBar';
 
 export default function MotivationalVideos({navigation}) {
+  // Importa handler delle traduzioni
   const {t} = useTranslation();
 
   /**
@@ -356,24 +356,16 @@ export default function MotivationalVideos({navigation}) {
   return (
     <>
       <View style={styles.container}>
-        <View style={styles.topBar}>
-          <Pressable
-            onPress={() => navigation.openDrawer()}
-            android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Hamburger style={styles.topBarIcon}/>
-          </Pressable>
-          <Text style={styles.topBarText}>{t('nav:motivationalvideos')}</Text>
-          <Pressable
-            onPress={toggleOverlayLogOut}
-            android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Logout style={styles.topBarIcon}/>
-          </Pressable>
-        </View>
+        {/* Includi la topbar */}
+        <TopBar
+          navigation={navigation}
+          toggleOverlayLogOut={toggleOverlayLogOut}
+        />
 
+        {/* Sezione del video player */}
         <ScrollView nestedScrollEnabled={true}>
-          {/* VIDEO */}
-
           <View style={styles.containerVideo}>
+            {/* Blocca qualsiasi tipologia di tocco in input sul video */}
             <Pressable
               onPress={() => {
                 // handle or ignore
@@ -454,24 +446,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
     paddingBottom: 20,
-  },
-  topBar: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: color.lightBlue,
-    padding: 10,
-  },
-  topBarText: {
-    color: color.white,
-    fontSize: 25,
-    fontWeight: 'bold',
-  },
-  topBarIcon: {
-    width: 35,
-    height: 35,
-    color: color.white,
   },
   contentCardContainer: {
     margin: 15,
