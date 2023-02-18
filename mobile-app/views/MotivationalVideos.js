@@ -220,12 +220,12 @@ export default function MotivationalVideos({navigation}) {
       // Se il nuovo tempo a cui mandare il player supera la durata totale del video,
       // procediamo a far terminare il video direttamente.
       // Il cambio di stato del player si occuperà di aggiornare il resto dei dati.
-      videoPlayer.seekTo(videoTotalTime);
+      videoPlayer.seekTo(videoTotalTime, true);
     } else if (newVideoTime <= 0) {
       // Se il nuovo tempo a cui mandare il player è inferiore o uguale a zero,
       // facciamo ripartire il video dall'inizio.
       // Il listener del current time si occuperà poi di aggiornare anche la UI.
-      videoPlayer.seekTo(0);
+      videoPlayer.seekTo(0, true);
 
       if (!playing) {
         setPlaying(true);
@@ -233,7 +233,7 @@ export default function MotivationalVideos({navigation}) {
     } else {
       // Se nessuno dei casi precedenti è vero, semplicemente cambiamo il tempo del video.
       // Il listener del current time si occuperà poi di aggiornare anche la UI.
-      videoPlayer.seekTo(newVideoTime);
+      videoPlayer.seekTo(newVideoTime, true);
     }
   };
 
