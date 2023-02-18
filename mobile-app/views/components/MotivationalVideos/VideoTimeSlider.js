@@ -1,6 +1,7 @@
 import {StyleSheet, View, Text} from 'react-native';
 import {Slider} from 'react-native-elements';
 import React from 'react';
+import colors from '../../../color';
 
 function VideoTimeSlider(props) {
   // Estrai le proprietà in maniera leggibile da props
@@ -32,6 +33,8 @@ function VideoTimeSlider(props) {
       <Slider
         style={styles.timeSlider}
         minimumValue={minTime}
+        thumbTintColor={colors.lightBlue}
+        thumbStyle={styles.thumbStyle}
         maximumValue={totalTime}
         value={internalValueChange}
         onValueChange={value => {
@@ -70,6 +73,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
+  },
+  thumbStyle: {
+    height: 25,
+    width: 25,
   },
 });
 
