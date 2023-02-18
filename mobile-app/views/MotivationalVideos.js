@@ -129,6 +129,11 @@ export default function MotivationalVideos({navigation}) {
     }
   };
 
+  /**
+   * Consente di cambiare il tempo di riproduzione del video.
+   * @param time Tempo di cui andare avanti o indietro in secondi.
+   * @returns {Promise<void>}
+   */
   const changeVideoPlayerTime = async time => {
     // Verifica che il parametro inviato sia effettivamente un numero.
     if (isNaN(time)) {
@@ -201,13 +206,13 @@ export default function MotivationalVideos({navigation}) {
           <Pressable
             onPress={() => navigation.openDrawer()}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Hamburger style={styles.topBarIcon} />
+            <Hamburger style={styles.topBarIcon}/>
           </Pressable>
           <Text style={styles.topBarText}>{t('nav:motivationalvideos')}</Text>
           <Pressable
             onPress={toggleOverlayLogOut}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Logout style={styles.topBarIcon} />
+            <Logout style={styles.topBarIcon}/>
           </Pressable>
         </View>
 
@@ -238,6 +243,19 @@ export default function MotivationalVideos({navigation}) {
             }}>
             <Pressable
               onPress={() => {
+                changeVideoPlayerTime(5);
+              }}
+              android_ripple={{color: color.edalabBlue, borderless: false}}
+              backgroundColor={color.lightBlue}
+              borderRadius={7}
+              width={60}
+              padding={5}
+              alignItems={'center'}
+              margin={10}>
+              {playing ? <Text>+5s</Text> : <Text>0</Text>}
+            </Pressable>
+            <Pressable
+              onPress={() => {
                 setPlaying(!playing);
               }}
               android_ripple={{color: color.edalabBlue, borderless: false}}
@@ -248,9 +266,9 @@ export default function MotivationalVideos({navigation}) {
               alignItems={'center'}
               margin={10}>
               {playing ? (
-                <Pause height={'25'} width={'40'} fill={'white'} />
+                <Pause height={'25'} width={'40'} fill={'white'}/>
               ) : (
-                <Play height={'25'} width={'40'} fill={'white'} />
+                <Play height={'25'} width={'40'} fill={'white'}/>
               )}
             </Pressable>
           </View>
