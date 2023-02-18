@@ -6,16 +6,15 @@ import {
   Pressable,
   SafeAreaView,
   FlatList,
-  ScrollView, Alert,
+  ScrollView,
+  Alert,
 } from 'react-native';
 import color from '../color';
-import {Divider} from 'react-native-elements';
 import Hamburger from '../icons/hamburger.svg';
 import Logout from '../icons/logout.svg';
 
 import Play from '../icons/play.svg';
 import Pause from '../icons/pause.svg';
-import Dot from '../icons/dry-clean.svg';
 import {useTranslation} from 'react-i18next';
 
 // teniamo l'import di YoutubeIframeRef per il commento sulla variabile e intellisense
@@ -23,6 +22,7 @@ import {useTranslation} from 'react-i18next';
 import YoutubePlayer, {YoutubeIframeRef} from 'react-native-youtube-iframe';
 import {get, logout} from '../api/restManager';
 import LogoutOverlay from '../components/LogoutOverlay';
+import ItemList from './components/MotivationalVideos/ItemList';
 
 export default function MotivationalVideos({navigation}) {
   const {t} = useTranslation();
@@ -184,36 +184,14 @@ export default function MotivationalVideos({navigation}) {
     setPlaying(true);
   };
 
-  const ItemList = ({title, id, link, index}) => (
-    <>
-      <View style={styles.itemContent} flexDirection={'row'}>
-        <View flexDirection={'column'} width={'100%'}>
-          <View
-            marginBottom={20}
-            marginLeft={5}
-            marginRight={5}
-            marginTop={5}
-            flexDirection={'row'}
-            justifyContent={'space-between'}>
-            <Dot style={styles.itemIcon} fill={color.black}/>
-            <Text style={styles.itemTextLong}>{title}</Text>
-            <Pressable
-              onPress={() => {
-                console.log('CAMBIO VIDEO IN', id, link);
-                changeVideoLinkPlaying(link);
-              }}
-              android_ripple={{color: color.lightBlue, borderless: true}}>
-              <Play style={styles.itemIconPlay}/>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-      <Divider orientation="horizontal"/>
-    </>
-  );
-
   const renderItemList = ({item, index}) => (
-    <ItemList title={item.title} index={index} id={item.id} link={item.link}/>
+    <ItemList
+      item={item}
+      onPress={link => {
+        console.log('CAMBIO VIDEO IN', link);
+        changeVideoLinkPlaying(link);
+      }}
+    />
   );
 
   return (
@@ -223,13 +201,13 @@ export default function MotivationalVideos({navigation}) {
           <Pressable
             onPress={() => navigation.openDrawer()}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Hamburger style={styles.topBarIcon}/>
+            <Hamburger style={styles.topBarIcon} />
           </Pressable>
           <Text style={styles.topBarText}>{t('nav:motivationalvideos')}</Text>
           <Pressable
             onPress={toggleOverlayLogOut}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Logout style={styles.topBarIcon}/>
+            <Logout style={styles.topBarIcon} />
           </Pressable>
         </View>
 
@@ -270,9 +248,9 @@ export default function MotivationalVideos({navigation}) {
               alignItems={'center'}
               margin={10}>
               {playing ? (
-                <Pause height={'25'} width={'40'} fill={'white'}/>
+                <Pause height={'25'} width={'40'} fill={'white'} />
               ) : (
-                <Play height={'25'} width={'40'} fill={'white'}/>
+                <Play height={'25'} width={'40'} fill={'white'} />
               )}
             </Pressable>
           </View>
