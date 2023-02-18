@@ -324,6 +324,9 @@ export default function MotivationalVideos({navigation}) {
       case 'playing':
         setPlaying(true);
         break;
+      case 'paused':
+        setPlaying(false);
+        break;
     }
   };
 
