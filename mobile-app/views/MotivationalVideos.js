@@ -8,13 +8,12 @@ import {
   FlatList,
   ScrollView,
   Alert,
+  Dimensions,
 } from 'react-native';
 import color from '../color';
 import Hamburger from '../icons/hamburger.svg';
 import Logout from '../icons/logout.svg';
 
-import Play from '../icons/play.svg';
-import Pause from '../icons/pause.svg';
 import {useTranslation} from 'react-i18next';
 
 // teniamo l'import di YoutubeIframeRef per il commento sulla variabile e intellisense
@@ -23,6 +22,8 @@ import YoutubePlayer, {YoutubeIframeRef} from 'react-native-youtube-iframe';
 import {get, logout} from '../api/restManager';
 import LogoutOverlay from '../components/LogoutOverlay';
 import ItemList from './components/MotivationalVideos/ItemList';
+import VideoTimeSlider from './components/MotivationalVideos/VideoTimeSlider';
+import VideoControls from './components/MotivationalVideos/VideoControls';
 
 export default function MotivationalVideos({navigation}) {
   const {t} = useTranslation();
@@ -38,6 +39,11 @@ export default function MotivationalVideos({navigation}) {
   const [playing, setPlaying] = useState(false);
   const [videoId, setVideoId] = useState('');
   const [videos, setVideos] = useState([]);
+  const [videoTotalTime, setVideoTotalTime] = useState(0);
+  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
+  const [currentVideoLink, setCurrentVideoLink] = useState(0);
+
+  let videoCurrentTimeInterval = null;
 
   useEffect(() => {
     getData();
@@ -89,18 +95,12 @@ export default function MotivationalVideos({navigation}) {
       d0.push(new_item);
     });
     // console.log("$$List", d0)
-    d0[0].link.split('/')[2] === 'youtu.be'
-      ? setVideoId(d0[0].link.split('/')[3])
-      : setVideoId(d0[0].link.split('v=')[1]);
     setVideos(d0);
+    changeVideoLinkPlaying(d0[0].link);
   };
 
   const toggleOverlayLogOut = () => {
     setOverlayLogoutVisible(!overlayLogoutVisible);
-  };
-
-  const togglePlaying = () => {
-    setPlaying(prev => !prev);
   };
 
   /**
@@ -134,7 +134,7 @@ export default function MotivationalVideos({navigation}) {
    * @param time Tempo di cui andare avanti o indietro in secondi.
    * @returns {Promise<void>}
    */
-  const changeVideoPlayerTime = async time => {
+  const changeVideoPlayerTimeIncrementally = async time => {
     // Verifica che il parametro inviato sia effettivamente un numero.
     if (isNaN(time)) {
       Alert.alert(
@@ -143,6 +143,8 @@ export default function MotivationalVideos({navigation}) {
       );
       return;
     }
+
+    console.log('CAMBIO IL TEMPO DEL VIDEO DI', time);
 
     // Ottieni il riferimento al video player.
     const videoPlayer = getVideoPlayerRef();
@@ -155,49 +157,154 @@ export default function MotivationalVideos({navigation}) {
       return;
     }
 
-    // Ottieni il tempo di durata del video (in secondi)
-    const totalVideoTime = await videoPlayer.getDuration();
-
     // Ottieni il tempo corrente del video (in secondi)
     const currentVideoTime = await videoPlayer.getCurrentTime();
 
     // Calcola il nuovo tempo a cui mandare il player
     const newVideoTime = currentVideoTime + time;
 
-    if (newVideoTime >= totalVideoTime) {
+    if (newVideoTime >= videoTotalTime) {
       // Se il nuovo tempo a cui mandare il player supera la durata totale del video,
       // procediamo a far terminare il video direttamente.
-      videoPlayer.seekTo(totalVideoTime);
+      videoPlayer.seekTo(videoTotalTime);
       setPlaying(false);
+      setVideoCurrentTime(videoTotalTime);
     } else if (newVideoTime <= 0) {
       // Se il nuovo tempo a cui mandare il player è inferiore o uguale a zero,
       // facciamo ripartire il video dall'inizio.
       videoPlayer.seekTo(0);
+      setVideoCurrentTime(0);
+
+      if (!playing) {
+        setPlaying(true);
+      }
     } else {
       // Se nessuno dei casi precedenti è vero, semplicemente cambiamo il tempo del video.
       videoPlayer.seekTo(newVideoTime);
+      setVideoCurrentTime(0);
     }
   };
 
-  const changeVideoLinkPlaying = newVideoLink => {
+  const changeVideoPlayerTimeDirectly = newTime => {
+    // Verifica che il parametro inviato sia effettivamente un numero.
+    if (isNaN(newTime)) {
+      Alert.alert(
+        'Errore',
+        'Errore interno. Il tempo selezionato non è valido. Riprova.',
+      );
+      return;
+    }
+
+    console.log('CAMBIO IL TEMPO DEL VIDEO IN', newTime);
+
+    // Ottieni il riferimento al video player.
+    const videoPlayer = getVideoPlayerRef();
+
+    if (videoPlayer == null) {
+      Alert.alert(
+        'Errore!',
+        'Errore interno. Attendere la visualizzazione completa del video player. Riprova.',
+      );
+      return;
+    }
+
+    videoPlayer.seekTo(newTime);
+    setVideoCurrentTime(newTime);
+  };
+
+  const changeVideoLinkPlaying = async newVideoLink => {
+    setCurrentVideoLink(newVideoLink);
+
     const newVideoId =
       newVideoLink.split('/')[2] === 'youtu.be'
         ? newVideoLink.split('/')[3]
         : newVideoLink.split('v=')[1];
 
     setVideoId(newVideoId);
+    setVideoCurrentTime(0);
     setPlaying(true);
+  };
+
+  /**
+   * Questa funzione viene invocata quando il video player è pronto.
+   * Ha il compito di resettare il tempo corrente del video,
+   * e d'impostare il tempo di durata totale del video, informazione
+   * accessibile solo quando il video player è pronto.
+   * @returns {Promise<void>}
+   */
+  const videoPlayerReadyEvent = async () => {
+    stopCurrentTimeInterval();
+    console.log('VIDEO PLAYER PRONTO');
+    setVideoCurrentTime(0);
+    const newVideoTotalTime = Math.round(
+      await getVideoPlayerRef().getDuration(),
+    );
+    setVideoTotalTime(newVideoTotalTime);
+    console.log('NUOVO TEMPO TOTALE VIDEO', newVideoTotalTime);
   };
 
   const renderItemList = ({item, index}) => (
     <ItemList
       item={item}
+      isCurrentlyPlayed={() => item.link === currentVideoLink}
       onPress={link => {
         console.log('CAMBIO VIDEO IN', link);
         changeVideoLinkPlaying(link);
       }}
     />
   );
+
+  // Calcola dinamicamente l'altezza del video player.
+  // Teniamo sempre un minimo di 200px come richiesto da specifiche della libreria.
+  // Se possibile, 1/4 dell'altezza rende il player carino.
+  const videoPlayerHeight = Math.min(Dimensions.get('screen').height / 4, 200);
+
+  /**
+   * Questa funzione viene utilizzata per far partire un intervallo che ogni 500ms
+   * prende il tempo corrente dal video e lo aggiorna nel nostro state.
+   */
+  const startCurrentTimeInterval = () => {
+    // Non far partire un altro intervallo se già presente.
+    if (videoCurrentTimeInterval != null) {
+      console.log('AVVIO TIMER RICHIESTO MA GIA AVVIATO.');
+      return;
+    }
+
+    console.log('AVVIO IL TIMER PER IL TEMPO CORRENTE DEL VIDEO');
+    videoCurrentTimeInterval = setInterval(async () => {
+      setVideoCurrentTime(await getVideoPlayerRef().getCurrentTime());
+    }, 500);
+  };
+
+  /**
+   * Questa funzione viene utilizzata per fermare l'intervallo
+   * che tiene traccia del tempo corrente del video.
+   */
+  const stopCurrentTimeInterval = () => {
+    console.log('FERMO IL TIMER PER IL TEMPO CORRENTE DEL VIDEO');
+    clearInterval(videoCurrentTimeInterval);
+    videoCurrentTimeInterval = null;
+  };
+
+  /**
+   * Questa funzione viene utilizzata per gestire gli stati del video player.
+   * Al cambio di alcuni stati, viene fatto partire / viene fermato il timer
+   * per tenere traccia del tempo corrente del video.
+   * @param state
+   */
+  const videoPlayerOnChangeState = state => {
+    switch (state) {
+      case 'buffering':
+      case 'paused':
+      case 'ended':
+      case 'unstarted':
+        stopCurrentTimeInterval();
+        break;
+      case 'playing':
+        startCurrentTimeInterval();
+        break;
+    }
+  };
 
   return (
     <>
@@ -230,47 +337,31 @@ export default function MotivationalVideos({navigation}) {
               <View pointerEvents="none">
                 <YoutubePlayer
                   ref={videoPlayerRef}
-                  height={250}
+                  height={videoPlayerHeight}
                   play={playing}
                   videoId={videoId}
+                  onReady={videoPlayerReadyEvent}
+                  onChangeState={state => videoPlayerOnChangeState(state)}
                 />
               </View>
             </Pressable>
           </View>
+          <VideoTimeSlider
+            videoCurrentTime={videoCurrentTime}
+            videoTotalTime={videoTotalTime}
+            onValueChange={value => changeVideoPlayerTimeDirectly(value)}
+          />
           <View
             style={{
               alignItems: 'center',
             }}>
-            <Pressable
-              onPress={() => {
-                changeVideoPlayerTime(5);
-              }}
-              android_ripple={{color: color.edalabBlue, borderless: false}}
-              backgroundColor={color.lightBlue}
-              borderRadius={7}
-              width={60}
-              padding={5}
-              alignItems={'center'}
-              margin={10}>
-              {playing ? <Text>+5s</Text> : <Text>0</Text>}
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                setPlaying(!playing);
-              }}
-              android_ripple={{color: color.edalabBlue, borderless: false}}
-              backgroundColor={color.lightBlue}
-              borderRadius={7}
-              width={60}
-              padding={5}
-              alignItems={'center'}
-              margin={10}>
-              {playing ? (
-                <Pause height={'25'} width={'40'} fill={'white'}/>
-              ) : (
-                <Play height={'25'} width={'40'} fill={'white'}/>
-              )}
-            </Pressable>
+            <VideoControls
+              isPlaying={playing}
+              onPlayingChange={newIsPlaying => setPlaying(newIsPlaying)}
+              onVideoTimeChange={newTime =>
+                changeVideoPlayerTimeIncrementally(newTime)
+              }
+            />
           </View>
           {/* VIDEO LIST */}
           <View style={styles.card}>
