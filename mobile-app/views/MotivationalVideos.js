@@ -63,6 +63,11 @@ export default function MotivationalVideos({navigation}) {
     }
   };
 
+  /**
+   * Questa funzione si occupa di scaricare i dati riguardanti i video.
+   * Una volta scaricati i video, se presenti, li carica all'interno della vista.
+   * @returns {Promise<void>}
+   */
   async function getData() {
     try {
       let data = await get('/multimedia');
@@ -80,6 +85,11 @@ export default function MotivationalVideos({navigation}) {
     }
   }
 
+  /**
+   * Questa funzione viene utilizzata da {@link getData()} per impostare
+   * all'interno della pagina i video disponibili.
+   * @param {object} videosData L'oggetto ritornato dal backend dei video
+   */
   const setData = videosData => {
     let d0 = [];
 
@@ -97,12 +107,17 @@ export default function MotivationalVideos({navigation}) {
         title: element.title,
         description: element.description,
       };
-      // console.log("$$new_item",new_item)
+
       d0.push(new_item);
     });
-    // console.log("$$List", d0)
+
+    // Imposta i video nella UI
     setVideos(d0);
-    changeVideoLinkPlaying(d0[0].link);
+
+    // Se abbiamo almeno un video, pre-impostalo come selezionato.
+    if (d0.length >= 1) {
+      changeVideoLinkPlaying(d0[0].link);
+    }
   };
 
   const toggleOverlayLogOut = () => {
@@ -394,12 +409,17 @@ export default function MotivationalVideos({navigation}) {
           {/* VIDEO LIST */}
           <View style={styles.card}>
             <SafeAreaView style={styles.contentCardContainer}>
-              <FlatList
-                data={videos}
-                renderItem={renderItemList}
-                keyExtractor={item => item.id}
-                nestedScrollEnabled={true}
-              />
+              {/* Gestisci il caso in cui non siano presenti video. */}
+              {videos.length >= 1 ? (
+                <FlatList
+                  data={videos}
+                  renderItem={renderItemList}
+                  keyExtractor={item => item.id}
+                  nestedScrollEnabled={true}
+                />
+              ) : (
+                <Text style={styles.errorText}>{t('error:noVideos')}</Text>
+              )}
             </SafeAreaView>
           </View>
 
@@ -457,5 +477,9 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     borderColor: color.gray,
     borderWidth: 1,
+  },
+  errorText: {
+    color: 'black',
+    fontSize: 16,
   },
 });

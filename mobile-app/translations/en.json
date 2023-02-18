@@ -101,7 +101,8 @@
     "noConnection": "No connection",
     "generic": "Something went wrong",
     "wrongVideoTime": "Internal Error. The selected video time is incorrect. Please retry.",
-    "videoPlayerNotReady": "Internal Error. The video player is not ready. Please retry."
+    "videoPlayerNotReady": "Internal Error. The video player is not ready. Please retry.",
+    "noVideos": "No videos available."
   },
   "days": {
     "monday": "Monday",
