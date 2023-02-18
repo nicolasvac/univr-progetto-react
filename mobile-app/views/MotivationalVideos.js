@@ -143,10 +143,7 @@ export default function MotivationalVideos({navigation}) {
   const changeVideoPlayerTimeIncrementally = async time => {
     // Verifica che il parametro inviato sia effettivamente un numero.
     if (isNaN(time)) {
-      Alert.alert(
-        'Errore',
-        'Errore interno. Il tempo selezionato non è valido. Riprova.',
-      );
+      Alert.alert(t('error:generic'), t('error:wrongVideoTime'));
       return;
     }
 
@@ -156,10 +153,7 @@ export default function MotivationalVideos({navigation}) {
     const videoPlayer = getVideoPlayerRef();
 
     if (videoPlayer == null) {
-      Alert.alert(
-        'Errore!',
-        'Errore interno. Attendere la visualizzazione completa del video player. Riprova.',
-      );
+      Alert.alert(t('error:generic'), t('error:videoPlayerNotReady'));
       return;
     }
 
@@ -194,10 +188,7 @@ export default function MotivationalVideos({navigation}) {
   const changeVideoPlayerTimeDirectly = newVideoTime => {
     // Verifica che il parametro inviato sia effettivamente un numero.
     if (isNaN(newVideoTime)) {
-      Alert.alert(
-        'Errore',
-        'Errore interno. Il tempo selezionato non è valido. Riprova.',
-      );
+      Alert.alert(t('error:generic'), t('error:wrongVideoTime'));
       return;
     }
 
@@ -207,10 +198,7 @@ export default function MotivationalVideos({navigation}) {
     const videoPlayer = getVideoPlayerRef();
 
     if (videoPlayer == null) {
-      Alert.alert(
-        'Errore!',
-        'Errore interno. Attendere la visualizzazione completa del video player. Riprova.',
-      );
+      Alert.alert(t('error:generic'), t('error:videoPlayerNotReady'));
       return;
     }
 

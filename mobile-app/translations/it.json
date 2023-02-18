@@ -99,7 +99,9 @@
     "emptyFields": "Inserisci tutti i campi",
     "wrongCredentials": "Credenziali non corrette",
     "noConnection": "Nessuna connessione",
-    "generic": "Qualcosa è andato storto"
+    "generic": "Qualcosa è andato storto",
+    "wrongVideoTime": "Errore interno. Il tempo del video selezionato è incorretto. Riprova.",
+    "videoPlayerNotReady": "Errore interno. Il video player non è ancora pronto per la visualizzazione. Riprova."
   },
   "days": {
     "monday": "Lunedì",
