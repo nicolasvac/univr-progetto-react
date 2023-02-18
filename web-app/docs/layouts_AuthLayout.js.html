@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: layouts/AuthLayout.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: layouts/AuthLayout.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useRef } from 'react';
+import PropTypes from 'prop-types';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import useScrollTrigger from '@material-ui/core/useScrollTrigger';
+import Box from '@material-ui/core/Box';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import FastfoodIcon from '@material-ui/icons/Fastfood';
+import FitnessCenterIcon from '@material-ui/icons/FitnessCenter';
+import ListIcon from "@material-ui/icons/List"
+import PersonIcon from '@material-ui/icons/Person';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import InsertInvitationIcon from '@material-ui/icons/InsertInvitation';
+import VerifiedUserIcon from '@material-ui/icons/VerifiedUser';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import AssessmentIcon from '@material-ui/icons/Assessment';
+import ListAltIcon from '@material-ui/icons/ListAlt';
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+import MoodIcon from '@material-ui/icons/Mood';
+import GroupIcon from '@material-ui/icons/Group';
+import {
+    Drawer,
+    List,
+    Divider,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
+    Avatar,
+    MenuItem,
+    Menu,
+    Badge,
+    FormControl,
+    FormGroup,
+    FormLabel,
+    FormControlLabel,
+    Checkbox,
+    FormHelperText,
+    Button,
+    DialogContent,
+    Dialog,
+    DialogTitle,
+    DialogActions,
+    ThemeProvider,
+    DialogContentText,
+    TextField,
+    CircularProgress,
+    IconButton,
+} from '@material-ui/core';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { appRoutes } from '../routes';
+import { useAuth } from "../contexts/AuthContext"
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import Link from '@material-ui/core/Link';
+import Tooltip from '@material-ui/core/Tooltip';
+import { Route } from 'react-router-dom'
+import { Timestamp } from '@firebase/firestore';
+import strings from '../components/Language';
+import theme from '../styles/MaterialTheme'
+import clsx from 'clsx'
+import { green } from '@material-ui/core/colors'
+import { Helmet } from 'react-helmet'
+
+// const theme = createTheme();
+const drawerWidth = 240;
+const useStyles = makeStyles((theme) => ({
+    root: {
+        display: 'flex',
+    },
+    appBar: {
+        // width: `calc(100% - ${drawerWidth}px)`,
+        // marginLeft: drawerWidth,
+        zIndex: theme.zIndex.drawer + 1
+    },
+    drawer: {
+        width: drawerWidth,
+        flexShrink: 0,
+    },
+    drawerPaper: {
+        width: drawerWidth,
+    },
+    // necessary for content to be below app bar
+    toolbar: theme.mixins.toolbar,
+    drawerContainer: {
+        overflow: 'auto',
+        //paddingTop: theme.spacing(2)
+    },
+    grow: {
+        flexGrow: 1
+    },
+    content: {
+        flexGrow: 1,
+        // backgroundColor: theme.palette.background.default,
+        padding: theme.spacing(3),
+    },
+    heading: {
+        fontSize: theme.typography.pxToRem(15),
+        fontWeight: theme.typography.fontWeightBold,
+        textTransform: "capitalize"
+        // flexShrink: 0,
+        // flexBasis: '20%'
+    },
+    avatar: {
+        width: theme.spacing(7),
+        height: theme.spacing(7),
+    },
+    sectionDesktop: {
+        // display: 'none',
+        [theme.breakpoints.up('md')]: {
+            display: 'flex',
+        },
+        display: 'flex',
+        '&amp; > *': {
+            margin: theme.spacing(1),
+        },
+    }
+}));
+
+function ElevationScroll(props) {
+    const { children, window } = props;
+    // Note that you normally won't need to set the window ref as useScrollTrigger
+    // will default to window.
+    // This is only being set here because the demo is in an iframe.
+    const trigger = useScrollTrigger({
+        disableHysteresis: true,
+        threshold: 0,
+        target: window ? window() : undefined,
+    });
+
+    return React.cloneElement(children, {
+        elevation: trigger ? 4 : 0,
+    });
+}
+
+ElevationScroll.propTypes = {
+    children: PropTypes.element.isRequired,
+    /**
+     * Injected by the documentation to work in an iframe.
+     * You won't need it on your project.
+     */
+    window: PropTypes.func,
+};
+
+const ArrowStyled = withStyles((theme) => ({
+    colorPrimary: {
+        color: '#fff'
+    }
+}))(KeyboardArrowRightIcon);
+
+const StyledBadge = withStyles((theme) => ({
+    badge: {
+        backgroundColor: '#44b700',
+        color: '#44b700',
+        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+        '&amp;::after': {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            animation: '$ripple 1.2s infinite ease-in-out',
+            border: '1px solid currentColor',
+            content: '""',
+        },
+    },
+    '@keyframes ripple': {
+        '0%': {
+            transform: 'scale(.8)',
+            opacity: 1,
+        },
+        '100%': {
+            transform: 'scale(2.4)',
+            opacity: 0,
+        },
+    },
+}))(Badge);
+
+function ActiveLastBreadcrumb({ links }) {
+    const handleClick = (event) => {
+        event.preventDefault();
+        console.info('You clicked a breadcrumb.');
+    }
+
+    // let parts = links.split('/');
+    // const place = parts[parts.length - 1];
+    // parts = parts.slice(1, parts.length - 1);
+
+    return (
+        &lt;Breadcrumbs aria-label="breadcrumb" separator={&lt;ArrowStyled color="primary" />}>
+            {
+                /*parts.map((part, partIndex) => {
+                    const path = ['', ...parts.slice(0, partIndex + 1)].join('/');
+                    console.debug(path);
+                    return &lt;Link key={partIndex.toString()} to={path}>{part}&lt;/Link>
+                })*/
+            }
+            &lt;Link style={{ color: '#fff' }} href="/" onClick={handleClick}>
+                root
+            &lt;/Link>
+            &lt;Link style={{ color: '#fff' }} href="/reserved" onClick={handleClick}>
+                home
+            &lt;/Link>
+            &lt;Link
+                style={{ color: '#fff' }}
+                href="/reserved/"
+                onClick={handleClick}
+                aria-current="page"
+            >
+                current page
+            &lt;/Link>
+        &lt;/Breadcrumbs>
+    );
+}
+
+function ConfirmationDialog(props) {
+    const { onClose, value: valueProp, open, ...other } = props;
+    // const [value, setValue] = React.useState(valueProp);
+    const [value, setValue] = React.useState(valueProp);
+    // const radioGroupRef = React.useRef(null);
+
+    React.useEffect(() => {
+        if (!open) {
+            setValue(() => valueProp);
+        }
+    }, [valueProp, open]);
+
+    // const handleEntering = () => {
+    //     if (radioGroupRef.current != null) {
+    //         radioGroupRef.current.focus();
+    //     }
+    // };
+
+    const handleCancel = () => {
+        onClose();
+    };
+
+    const handleOk = () => {
+        onClose(value);
+    };
+
+    const handleChange = ({ target }) => {
+        setValue(v => ({ ...v, [target.name]: target.checked }));
+    };
+
+    return (
+        &lt;Dialog
+            maxWidth="sm"
+            fullWidth
+            // onEntering={handleEntering}
+            aria-labelledby="confirmation-dialog-title"
+            open={open}
+            onClose={handleCancel}
+            {...other}
+        >
+            &lt;DialogTitle id="confirmation-dialog-title">{strings.general.confirm}&lt;/DialogTitle>
+            &lt;DialogContent dividers>
+                {/* &lt;RadioGroup
+                    ref={radioGroupRef}
+                    aria-label="ringtone"
+                    name="ringtone"
+                    value={value}
+                    onChange={handleChange}
+                >
+                    {options.map((option) => (
+                        &lt;FormControlLabel value={option} key={option} control={&lt;Radio />} label={option} />
+                    ))}
+                &lt;/RadioGroup> */}
+                &lt;FormControl component="fieldset">
+                    &lt;FormLabel component="legend">Rimuovi&lt;/FormLabel>
+                    &lt;FormGroup>
+                        &lt;FormControlLabel
+                            control={&lt;Checkbox checked={value.remove} onChange={handleChange} name="remove" />}
+                            label={strings.general.from_patient_list}
+                        />
+                        &lt;FormControlLabel
+                            control={&lt;Checkbox checked={value.delete} onChange={handleChange} name="delete" />}
+                            label={strings.general.all_patient_data}
+                        />
+
+                    &lt;/FormGroup>
+                    &lt;FormHelperText>{strings.general.select_choice_before_confirmation}&lt;/FormHelperText>
+                &lt;/FormControl>
+            &lt;/DialogContent>
+            &lt;DialogActions>
+                &lt;Button autoFocus onClick={handleCancel} color="secondary" variant="text">
+                    {strings.general.cancel}
+                &lt;/Button>
+                &lt;Button onClick={handleOk} color="primary" variant="contained">
+                    {strings.general.confirm}
+                &lt;/Button>
+            &lt;/DialogActions>
+        &lt;/Dialog>
+    );
+}
+
+ConfirmationDialog.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
+    value: PropTypes.object.isRequired,
+};
+
+function NewAppointmentDialog(props) {
+    const { open, onClose, value: valueProp, ...rest } = props;
+
+    React.useEffect(() => {
+        if (!open) {
+            setState(() => valueProp);
+        }
+    }, [valueProp, open]);
+
+    const handleCancel = () => {
+        onClose();
+    };
+
+    const handleDateChange = (e) => {
+        e.persist();
+        const name = e.target.name;
+        const value = e.target.value;
+        setState(s => ({ ...s, [name]: value }))
+    }
+
+    const handleTimeChange = (e) => {
+        e.persist();
+        const name = e.target.name;
+        const value = e.target.value;
+        setState(s => ({ ...s, [name]: value }))
+    }
+
+    const handleOk = () => {
+        onClose(state);
+    };
+
+    const [state, setState] = React.useState(valueProp)
+
+    return (
+        &lt;Dialog
+            fullWidth
+            maxWidth="xs"
+            {...rest}
+            open={open}
+            onClose={handleCancel}
+        >
+            &lt;DialogTitle>
+                {strings.general.create_new_appointment}
+            &lt;/DialogTitle>
+            &lt;DialogContent dividers>
+                &lt;DialogContentText>
+                    {strings.general.select_day_time}
+                &lt;/DialogContentText>
+                &lt;TextField
+                    fullWidth
+                    margin="normal"
+                    size="medium"
+                    // label="Data"
+                    id="date-appointment"
+                    variant="outlined"
+                    type="date"
+                    // placeholder="2020-01-01"
+                    helperText="Giorno"
+                    name="date"
+                    // InputLabelProps={{
+                    //     shrink: true,
+                    // }}
+                    value={state.date}
+                    onChange={handleDateChange}
+                />
+                &lt;TextField
+                    id="time-appointment"
+                    type="time"
+                    name="time"
+                    // label="Ora"
+                    fullWidth
+                    variant="outlined"
+                    // placeholder="00:00"
+                    helperText="Orario"
+                    margin="normal"
+                    size="medium"
+                    value={state.time}
+                    onChange={handleTimeChange}
+                />
+            &lt;/DialogContent>
+            &lt;DialogActions>
+                &lt;Button variant="text" color="secondary" onClick={handleCancel}>
+                    {strings.general.cancel}
+                &lt;/Button>
+                &lt;Button variant="contained" color="primary" onClick={handleOk}>
+                    {strings.general.create}
+                &lt;/Button>
+
+            &lt;/DialogActions>
+        &lt;/Dialog>
+    )
+}
+
+export default function AuthLayout(props) {
+    const classes = useStyles();
+    // console.debug(props);
+    const { history, location } = props;
+    const { pathname } = location;
+    // console.debug(pathname);
+    const titlePage = location.state?.titlePage;
+    const patient = location.state?.patient;
+    const [state, setState] = React.useState({
+        patient: {
+            name: "",
+            surname: "",
+            therapyEndDate: "",
+            therapyStartDate: "",
+            weight: "",
+            height: "",
+            age: "",
+            id: "",
+        },
+        meanHeight: 0,
+        meanWeight: 0,
+        meanAges: 0,
+        patients: [],
+        males: 0,
+        females: 0,
+        openConfirmationDialog: false,
+        confirmState: {
+            delete: false,
+            remove: true
+        },
+        openNewAppointmentDialog: false,
+        newAppointment: {
+            time: "",
+            date: "",
+        },
+        updatePatientData: 1,
+        anchorEl: null,
+        openMenu: false,
+        menu: '',
+    });
+
+
+    const handleMenu = (menu) => ({ currentTarget }) => {
+        setState((s) => ({
+            ...s,
+            openMenu: Boolean(currentTarget),
+            anchorEl: currentTarget,
+            menu: menu
+        }));
+    }
+
+    const {
+        logout,
+        currentUser,
+        verifyEmail,
+        getPatient,
+        getPatients,
+        removePatient,
+        unlinkPatient,
+        updatePatientAppointments,
+        getPatientNotifications,
+    } = useAuth();
+
+    const handleMenuClose = () => {
+        setState(s => ({ ...s, anchorEl: null, openMenu: false }))
+    };
+
+    const redirectToProfile = () => {
+        handleMenuClose();
+        history.push("/reserved/profile");
+    }
+
+    const handleSignout = async () => {
+        try {
+            await logout()
+            history.push('/')
+        } catch (error) {
+            console.error(error.message)
+        }
+    }
+
+    const isMountedRef = useRef(null);
+
+    const handleModifyProfile = () => {
+        history.push("/reserved/update-profile", { titlePage: "Modify profile" });
+    }
+
+    const verifyAccount = async () => {
+        try {
+            await verifyEmail();
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+
+    const renderNotificationsMenu = (
+        &lt;Menu
+            anchorEl={state.anchorEl}
+            anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            open={state.openMenu &amp;&amp; state.menu === 'notifications'}
+            onClose={handleMenuClose}
+        >
+            &lt;MenuItem>
+                &lt;ListItemIcon>
+                    &lt;NotificationsIcon />
+                &lt;/ListItemIcon>
+                &lt;ListItemText primary={"nome paziente"} secondary={
+                    &lt;React.Fragment>
+                        &lt;Typography
+                            component="span"
+                            variant="body2"
+                            color="textPrimary"
+                        >
+                            title notification
+                        &lt;/Typography>
+                        &lt;br />
+                        body notification
+                    &lt;/React.Fragment>
+                } />
+            &lt;/MenuItem>
+            &lt;Divider variant="inset" />
+            &lt;MenuItem>&lt;ListItemIcon>
+                &lt;NotificationsIcon />
+            &lt;/ListItemIcon>
+                &lt;ListItemText primary={"titolo"} secondary={"descrizione"} />
+            &lt;/MenuItem>
+
+        &lt;/Menu>
+    )
+
+    const renderMenu = (
+        &lt;Menu
+            anchorEl={state.anchorEl}
+            anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            id={"account-control"}
+            keepMounted
+            transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            getContentAnchorEl={null} // !Important
+            open={state.openMenu &amp;&amp; state.menu === 'user'}
+            onClose={handleMenuClose}
+        >
+            &lt;MenuItem button onClick={redirectToProfile}>
+                &lt;ListItemText primary={`${currentUser.displayName}`} secondary={currentUser.email} />
+            &lt;/MenuItem>
+            {currentUser.emailVerified === true ? (null) :
+                &lt;MenuItem button onClick={verifyAccount}>
+                    &lt;ListItemIcon>
+                        &lt;VerifiedUserIcon />
+                    &lt;/ListItemIcon>
+                    &lt;ListItemText
+                        primary="Verify email"
+                    // secondary={"check your inbox"} 
+                    />
+                &lt;/MenuItem>
+            }
+            &lt;MenuItem button onClick={handleModifyProfile}>
+                &lt;ListItemIcon>
+                    &lt;PersonIcon />
+                &lt;/ListItemIcon>
+                &lt;ListItemText primary="Update profile" />
+            &lt;/MenuItem>
+            &lt;Divider />
+            &lt;MenuItem button onClick={handleSignout}>
+                &lt;ListItemIcon>
+                    &lt;ExitToAppIcon />
+                &lt;/ListItemIcon>
+                &lt;ListItemText primary="Sign out" />
+            &lt;/MenuItem>
+        &lt;/Menu>
+    );
+
+    const isSelected = (path) => path === pathname
+
+    const [expanded, setExpanded] = React.useState(false);
+
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
+
+    const handleOnCloseAppointmentDialog = async (value) => {
+        if (value !== undefined) {
+            console.debug(value);
+
+            try {
+
+                let { appointments } = state.patient;
+                // const { newAppointment } = state
+                if (appointments === undefined) {
+                    appointments = []
+                }
+                const newDate = new Date(`${value.date}T${value.time}`)
+                console.debug(newDate);
+                const newTimestamp = Timestamp.fromDate(newDate)
+                console.debug(newTimestamp);
+                appointments.push(newTimestamp)
+
+                await updatePatientAppointments({ appointments: appointments }, patient);
+                setState(s => ({ ...s, openNewAppointmentDialog: false, newAppointment: value, updatePatientData: s.updatePatientData + 1 }))
+
+
+            } catch (error) {
+                console.error(error);
+            }
+
+        } else {
+            setState(s => ({ ...s, openNewAppointmentDialog: false }))
+        }
+    }
+
+    const handleOnCloseDialog = async (confirmState) => {
+        if (confirmState) {
+
+            try {
+                if (confirmState.delete) {
+                    await removePatient(patient);
+                } else if (confirmState.remove) {
+                    await unlinkPatient(patient);
+                }
+                setState(s => ({ ...s, openConfirmationDialog: false, confirmState: confirmState }));
+                history.push("/reserved/");
+            } catch (error) {
+                console.debug(error?.message);
+            }
+
+        } else {
+            setState(s => ({ ...s, openConfirmationDialog: false }))
+        }
+    }
+
+    React.useEffect(() => {
+        isMountedRef.current = true;
+
+        const fetchData = async () => {
+
+            await getPatient(patient)
+                .then((doc) => {
+                    const data = doc.data();
+                    const patient = { ...data, weight: data.weight[0].value, id: doc.id }
+                    // console.debug(data.data());
+                    if (isMountedRef.current)
+                        setState(s => ({ ...s, patient: patient }))
+                })
+                .catch(error => console.debug(error.message))
+        }
+
+        patient !== undefined &amp;&amp; fetchData();
+
+        return () => (isMountedRef.current = false)
+    }, [patient, state.updatePatientData]);
+
+    React.useEffect(() => {
+        // it works and it's fine
+        const avg_reducer = (p, c, i) => p + (c - p) / (i + 1);
+
+        const fetchData = async () => {
+            const promises = [];
+            promises.push(getPatients());
+            promises.push(getPatientNotifications())
+            try {
+                const [snapPatients, snapshotNotifications] = await Promise.all(promises);
+                const patients = snapPatients.docs.map(doc => {
+                    const data = doc.data();
+                    const uid = doc.id;
+                    const patient = {
+                        ...data,
+                        weights: data.weight,
+                        height: parseInt(data.height)
+                    }
+                    const weights = patient.weights.map((w) => ({ time: w.time.toDate(), value: w.value }));
+                    // const weight = new Date(Math.max(...weights.map(e => new Date(e.time))));
+                    // console.debug(patient.weight[0].time.toDate());
+                    const weight = weights.reduce((a, b) => {
+                        return a.time > b.time ? a : b;
+                    });
+                    // console.debug(weight);
+                    return ({ ...patient, id: uid, weights: weights, weight: weight });
+                });
+                const males = patients.filter(({ gender }) => gender.toString().toLowerCase() === "male").length;
+                const females = Math.abs(patients.length - males);
+                const mean_ages = patients.map(({ age }) => age).reduce(avg_reducer, 0);
+                const mean_weight = patients.map(({ weight }) => parseInt(weight.value)).reduce(avg_reducer, 0);
+                const mean_height = patients.map(({ height }) => parseInt(height)).reduce(avg_reducer, 0);
+
+                const notifications = snapshotNotifications.docs.map((doc) => ({ ...doc.data(), uid: doc.id }))
+                if (isMountedRef.current)
+                    setState((s) => ({
+                        ...s,
+                        patients: patients,
+                        meanAges: parseFloat(mean_ages).toFixed(2),
+                        meanWeight: parseFloat(mean_weight).toFixed(2),
+                        meanHeight: parseFloat(mean_height).toFixed(2),
+                        // patients: patients,
+                        males: males,
+                        females: females,
+                        notifications: notifications,
+                    }));
+                // console.debug(notifications);
+            } catch (error) {
+                console.error(error.code);
+                console.error(error.message)
+            }
+        }
+        isMountedRef.current = true;
+        fetchData();
+        return () => (isMountedRef.current = false)
+    }, [])
+
+    const _generatePath = (path) => {
+        // const { patient } = state;
+        // if (patient.id) 
+        //     return generatePath(path, { patient: patient.id })
+        // else 
+        return path;
+
+    }
+
+    // const [openTooltip, setOpenTooltip] = React.useState(false);
+
+    // const handleTooltipClose = () => {
+    //     setOpenTooltip(false);
+    // };
+
+    // const handleTooltipOpen = () => {
+    //     setOpenTooltip(true);
+    // };
+
+    return (
+        &lt;div className={classes.root}>
+            &lt;CssBaseline />
+            &lt;ConfirmationDialog
+                id="confirm-deletion"
+                keepMounted
+                open={state.openConfirmationDialog}
+                onClose={handleOnCloseDialog}
+                value={state.confirmState}
+            />
+            &lt;NewAppointmentDialog
+                id="new-appointment-dialog"
+                keepMounted
+                open={state.openNewAppointmentDialog}
+                onClose={handleOnCloseAppointmentDialog}
+                value={state.newAppointment}
+            />
+            &lt;ElevationScroll {...props}>
+                &lt;AppBar position="fixed" className={classes.appBar}>
+                    &lt;Toolbar>
+                        &lt;Typography variant="h6">{titlePage !== undefined ? titlePage : ""}&lt;/Typography>
+
+                        {/* &lt;ActiveLastBreadcrumb links={pathname} /> */}
+                        &lt;div className={classes.grow} />
+                        &lt;div className={classes.sectionDesktop}>
+                            {/* &lt;IconButton
+                                style={{ padding: 0 }}
+                                edge="end"
+                                aria-label="account of current user"
+                                aria-controls={"account-control"}
+                                aria-haspopup="true"
+                                onClick={handleProfileMenuOpen}
+                                color="inherit"
+                            >
+
+                                &lt;Avatar src={avatarURL} />
+
+                            &lt;/IconButton> */}
+                            &lt;IconButton style={{ color: '#fff' }} onClick={handleMenu('notifications')}>
+                                &lt;Badge badgeContent={4}>
+                                    &lt;NotificationsIcon />
+                                &lt;/Badge>
+                            &lt;/IconButton>
+                            {/* &lt;ClickAwayListener onClickAway={handleTooltipClose}>
+                                &lt;div> */}
+                            &lt;Tooltip
+                                // PopperProps={{
+                                //     disablePortal: true,
+                                // }}
+                                // onClose={handleTooltipClose}
+                                // open={openTooltip}
+                                disableFocusListener
+                                // disableHoverListener
+                                disableTouchListener
+                                title={&lt;>
+                                    &lt;Typography variant="button">{`${currentUser.displayName}`}&lt;/Typography>
+                                    &lt;Typography variant="body2">{currentUser.email}&lt;/Typography>
+                                &lt;/>}
+                            >
+                                &lt;StyledBadge
+                                    overlap="circular"
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right',
+                                    }}
+                                    // onClick={handleProfileMenuOpen}
+                                    onClick={handleMenu('user')}
+                                    variant="dot"
+                                    aria-label="account of current user"
+                                    aria-controls={"account-control"}
+                                    aria-haspopup="true"
+                                >
+                                    &lt;Avatar alt={`${currentUser.displayName}`} />
+                                &lt;/StyledBadge>
+                            &lt;/Tooltip>
+                            {/* &lt;/div>
+                            &lt;/ClickAwayListener> */}
+                        &lt;/div>
+                    &lt;/Toolbar>
+                &lt;/AppBar>
+            &lt;/ElevationScroll>
+            {renderMenu}
+            {renderNotificationsMenu}
+            {/* &lt;Toolbar /> */}
+            &lt;Drawer
+                className={classes.drawer}
+                variant="permanent"
+                classes={{
+                    paper: classes.drawerPaper,
+                }}
+                anchor="left"
+            >
+                {/*&lt;div className={classes.toolbar} >
+                    &lt;Avatar />
+                &lt;/div>
+                 &lt;Divider /> */}
+                &lt;Toolbar />
+                &lt;div className={classes.drawerContainer}>
+                    {
+                        patient &amp;&amp;
+                        &lt;Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+                            &lt;AccordionSummary
+                                expandIcon={&lt;ExpandMoreIcon />}
+                                aria-controls="panel1a-content"
+                                id="panel1a-header"
+                            >
+                                &lt;Typography
+                                    className={classes.heading}>
+                                    {state.patient?.name}&amp;nbsp; {state.patient?.surname}
+                                &lt;/Typography>
+                            &lt;/AccordionSummary>
+                            &lt;AccordionDetails>
+                                &lt;List dense style={{ width: '100%' }}>
+                                    &lt;ListItem>
+                                        &lt;ListItemText
+                                            secondary={strings.measures.height}
+                                            primary={state.patient?.height}
+                                        />
+                                    &lt;/ListItem>
+                                    &lt;ListItem>
+                                        &lt;ListItemText
+                                            secondary={strings.measures.weight}
+                                            primary={`${state.patient?.weight}`}
+                                        />
+                                    &lt;/ListItem>
+                                    &lt;ListItem>
+                                        &lt;ListItemText
+                                            secondary={strings.measures.age}
+                                            primary={state.patient.age}
+                                        />
+                                    &lt;/ListItem>
+                                    &lt;ListItem>
+                                        &lt;ListItemText
+                                            secondary={"Data inizio terapia"}
+                                            primary={state.patient?.therapyStartDate}
+                                        />
+                                    &lt;/ListItem>
+                                    &lt;ListItem>
+                                        &lt;ListItemText
+                                            secondary={"Data fine terapia"}
+                                            primary={state.patient?.therapyEndDate}
+                                        />
+                                    &lt;/ListItem>
+
+                                &lt;/List>
+                            &lt;/AccordionDetails>
+                        &lt;/Accordion>}
+                    {patient &amp;&amp;
+                        &lt;List dense>
+                            {
+                                [{
+                                    path: "/reserved/notifications",
+                                    titlePage: strings.pageTitles.notifications,
+                                    icon: &lt;NotificationsIcon />
+                                }, {
+                                    path: "/reserved/therapy-status",
+                                    titlePage: strings.pageTitles.therapy_status,
+                                    icon: &lt;AssessmentIcon />
+                                }, {
+                                    path: "/reserved/nutritional-plan",
+                                    titlePage: strings.pageTitles.nutritional_plan,
+                                    icon: &lt;ListAltIcon />
+                                }, {
+                                    path: "/reserved/physical-exercises",
+                                    titlePage: strings.pageTitles.physical_exercises,
+                                    icon: &lt;MoodIcon />
+                                }, {
+                                    path: "/reserved/first-visit",
+                                    titlePage: strings.pageTitles.first_visit,
+                                    icon: &lt;LocalHospitalIcon />
+                                }].map((item) => (
+                                    &lt;ListItem
+                                        key={item.path}
+                                        button
+                                        selected={isSelected(item.path)}
+                                        onClick={() => {
+                                            history.push(
+                                                item.path,
+                                                {
+                                                    patient: patient,
+                                                    titlePage: item.titlePage,
+                                                }
+                                            )
+                                        }}
+                                    >
+                                        &lt;ListItemIcon>{item.icon}&lt;/ListItemIcon>
+                                        &lt;ListItemText primary={item.titlePage} />
+                                    &lt;/ListItem>
+                                ))
+                            }
+                            {/* &lt;ListItem
+                                button
+                                selected={isSelected("/reserved/notifications")}
+                                onClick={() => (
+                                    history.push(
+                                        '/reserved/notifications',
+                                        {
+                                            patient: patient,
+                                            titlePage: "Notifications",
+                                        }
+                                    )
+                                )}
+                            >
+                                &lt;ListItemText primary={"Notifications"} />
+                            &lt;/ListItem>
+                            &lt;ListItem button selected={isSelected("/reserved/therapy-status")}
+                                onClick={() => history.push("/reserved/therapy-status", { patient: patient, titlePage: strings.pageTitles.therapy_status })}
+                            >
+                                &lt;ListItemText primary={strings.pageTitles.therapy_status} />
+                            &lt;/ListItem>
+                            &lt;ListItem button selected={isSelected("/reserved/nutritional-plan")}
+                                onClick={() => history.push("/reserved/nutritional-plan", { patient: patient, titlePage: "Nutritional Plan" })}
+                            >
+                                &lt;ListItemText primary={"Nutritional plan"} />
+                            &lt;/ListItem>
+                            &lt;ListItem button selected={isSelected("/reserved/physical-exercises")}
+                                onClick={() => history.push("/reserved/physical-exercises", { patient: patient, titlePage: "Physical exercises" })}
+                            >
+                                &lt;ListItemText primary={"Physical exercise"} />
+                            &lt;/ListItem> */}
+
+                            &lt;ListItem
+                                button
+                                onClick={() => setState((s) => ({ ...s, openNewAppointmentDialog: true }))}
+                            >
+                                &lt;ListItemIcon>&lt;InsertInvitationIcon />&lt;/ListItemIcon>
+                                &lt;ListItemText primary="Nuovo appuntamento" />
+                            &lt;/ListItem>
+                            &lt;ListItem
+                                button
+                                onClick={() => setState(s => ({
+                                    ...s,
+                                    openConfirmationDialog: true,
+                                    confirmState:
+                                    {
+                                        remove: true,
+                                        delete: false
+                                    }
+                                }))}
+                            >
+                                &lt;ListItemIcon> &lt;RemoveCircleOutlineIcon />&lt;/ListItemIcon>
+                                &lt;ListItemText primary={"Rimuovi paziente"} />
+                                {/* &lt;ListItemSecondaryAction >
+                                    &lt;RemoveCircleOutlineIcon fontSize="medium" />
+                                &lt;/ListItemSecondaryAction> */}
+                            &lt;/ListItem>
+                        &lt;/List>
+                    }
+                    {patient === undefined ? &lt;Accordion elevation={0} expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+                        &lt;AccordionSummary
+                            expandIcon={&lt;ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1a-header"
+                        // style={{ backgroundColor: "#e3e3e3", borderRadius: 16 }}
+                        >
+                            &lt;Typography className={classes.heading}>Statistiche pazienti&lt;/Typography>
+                        &lt;/AccordionSummary>
+                        &lt;AccordionDetails>
+                            &lt;List dense style={{ width: '100%' }} disablePadding>
+                                &lt;ListItem component="li">
+                                    &lt;ListItemText
+                                        primary={`${state.patients.length}`}
+                                        secondary={"Numero pazienti"}
+                                    />
+                                &lt;/ListItem>
+                                &lt;ListItem>
+                                    &lt;ListItemText
+                                        primary={`${state.females}`}
+                                        secondary={"Femmine"}
+                                    />
+                                &lt;/ListItem>
+                                &lt;ListItem>
+                                    &lt;ListItemText
+                                        primary={`${state.males}`}
+                                        secondary={"Maschi"}
+                                    />
+                                &lt;/ListItem>
+                                &lt;ListItem>
+                                    &lt;ListItemText
+                                        primary={`${state.meanWeight}`}
+                                        secondary={"Peso medio"}
+                                    />
+                                &lt;/ListItem>
+                                &lt;ListItem>
+                                    &lt;ListItemText
+                                        primary={`${state.meanHeight}`}
+                                        secondary={"Altezza media"}
+                                    />
+                                &lt;/ListItem>
+                                &lt;ListItem>
+                                    &lt;ListItemText
+                                        primary={`${state.meanAges}`}
+                                        secondary={"Eta' media"}
+                                    />
+                                &lt;/ListItem>
+                                {/* &lt;Divider/> */}
+                                &lt;ListItem button
+                                    onClick={() => history.push("/reserved/patients-statistics", { patient: patient, titlePage: "Statistiche pazienti" })}>
+                                    {/* &lt;ListItemIcon>
+                                        &lt;VerticalSplitIcon />
+                                    &lt;/ListItemIcon> */}
+                                    &lt;ListItemText primary="See more" secondary={"..."} />
+                                &lt;/ListItem>
+                            &lt;/List>
+                        &lt;/AccordionDetails>
+                    &lt;/Accordion> : (null)}
+                    {/* &lt;Divider/> */}
+                    {
+                        patient === undefined ? (&lt;List dense>
+                            &lt;ListItem button>
+                                {/* &lt;ListItemIcon> &lt;InboxIcon /> &lt;/ListItemIcon> */}
+                                &lt;ListItemText primary={"Total seen videos"} secondary={"543"} />
+                            &lt;/ListItem>
+                            &lt;ListItem button>
+                                {/* &lt;ListItemIcon> &lt;MailIcon />&lt;/ListItemIcon> */}
+                                &lt;ListItemText primary={"Staff"} secondary={"5"} />
+                            &lt;/ListItem>
+                        &lt;/List>) : (null)
+                    }
+                    &lt;Divider />
+                    &lt;List dense>
+                        {[{
+                            path: "/reserved/",
+                            titlePage: strings.pageTitles.patients,
+                            icon: &lt;GroupIcon />
+                        }, {
+                            path: "/reserved/create-patient",
+                            titlePage: strings.pageTitles.add_patient,
+                            icon: &lt;PersonAddIcon />
+                        }, {
+                            path: "/reserved/foods",
+                            titlePage: strings.pageTitles.foods,
+                            icon: &lt;FastfoodIcon />
+                        }, {
+                            path: "/reserved/workouts",
+                            titlePage: strings.pageTitles.workouts,
+                            icon: &lt;FitnessCenterIcon />
+                        }].map((item) => (
+                            &lt;ListItem
+                                key={item.path}
+                                button
+                                selected={isSelected(item.path)}
+                                onClick={() => {
+                                    history.push(
+                                        item.path,
+                                        {
+                                            patient: patient,
+                                            titlePage: item.titlePage,
+                                        }
+                                    )
+                                }}
+                            >
+                                &lt;ListItemIcon>{item.icon}&lt;/ListItemIcon>
+                                &lt;ListItemText primary={item.titlePage} />
+                            &lt;/ListItem>
+                        ))}
+                    &lt;/List>
+                    {/* &lt;List dense>
+                        &lt;ListItem button
+                            selected={isSelected("/reserved/")}
+                            onClick={() => history.push("/reserved/", { patient: undefined, titlePage: "Patients" })}>
+                            &lt;ListItemIcon>
+                                &lt;ListIcon />
+                            &lt;/ListItemIcon>
+                            &lt;ListItemText primary={"Patients"} />
+                        &lt;/ListItem>
+                        &lt;ListItem button
+                            selected={isSelected("/reserved/create-patient")}
+                            onClick={() => history.push("/reserved/create-patient", {
+                                patient: patient, titlePage: "Create Patient"
+                            })}>
+                            &lt;ListItemIcon> &lt;PersonAddIcon />&lt;/ListItemIcon>
+                            &lt;ListItemText primary={"Add patient"} secondary={"Register new patient"} />
+                        &lt;/ListItem>
+                        &lt;ListItem button
+                            selected={isSelected("/reserved/foods")}
+                            onClick={() => history.push("/reserved/foods", { patient: patient, titlePage: "Foods" })}>
+                            &lt;ListItemIcon>
+                                &lt;FastfoodIcon />
+                            &lt;/ListItemIcon>
+                            &lt;ListItemText primary={"Foods"} />
+                        &lt;/ListItem>
+                        &lt;ListItem button
+                            selected={isSelected("/reserved/workouts")}
+                            onClick={() => history.push("/reserved/workouts", { patient: patient, titlePage: "Workouts" })}>
+                            &lt;ListItemIcon>
+                                &lt;FitnessCenterIcon />
+                            &lt;/ListItemIcon>
+                            &lt;ListItemText primary={"Workouts"} />
+                        &lt;/ListItem>
+                    &lt;/List> */}
+                &lt;/div>
+            &lt;/Drawer >
+            &lt;main className={classes.content}>
+                {/* &lt;div className={classes.toolbar} /> */}
+                &lt;Toolbar />
+                &lt;Box my={2}>
+                    {/* &lt;ThemeProvider theme={theme}> */}
+                    {appRoutes.map(({ component: Component, ...prop }) => (
+                        &lt;Route
+                            // use exact or wrap with Switch component
+                            exact
+                            // prop.layout + prop.path
+                            path={_generatePath(prop.layout + prop.path)}
+                            // component={prop.component}
+                            render={(props) => {
+                                return (
+                                    &lt;>
+                                        &lt;Helmet>
+                                            &lt;title>{`${prop.title} | JP Obesity`}&lt;/title>
+                                            &lt;meta name='author' content='M. Jereghi' />
+                                            &lt;meta name='description' content={prop.description} />
+                                        &lt;/Helmet>
+                                        &lt;Component {...props} />
+                                    &lt;/>
+                                )
+                            }}
+                            key={prop.path}
+                        />
+                    ))}
+                    {/* &lt;/ThemeProvider> */}
+                &lt;/Box>
+            &lt;/main>
+        &lt;/div >
+    );
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#Account">Account</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#ForgotPassword">ForgotPassword</a></li><li><a href="global.html#NutritionalPlan">NutritionalPlan</a></li><li><a href="global.html#OtherDetails">OtherDetails</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#VisitPage">VisitPage</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 17 2021 19:20:11 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+{
+  "login": {
+    "password": "Password",
+    "username": "Username",
+    "login": "Login",
+    "email": "Email"
+  },
+  "homepage": {
+    "homepage": "Homepage",
+    "userInfo": "Informazioni utente",
+    "nextAppointments": "Prossimi appuntamenti",
+    "whatToEatToday": "Cosa mangiare oggi",
+    "name": "Nome",
+    "surname": "Cognome",
+    "age": "Età",
+    "gender": "Sesso",
+    "appointment": "Appuntamento",
+    "date": "Data"
+  },
+  "foodagenda": {
+    "foodagenda": "Piano Nutrizionale",
+    "today": "Oggi",
+    "breakfast": "Colazione",
+    "morningBreak": "Spuntino Mattina",
+    "lunch": "Pranzo",
+    "afternoonBreak": "Spuntino Pomeriggio",
+    "dinner": "Cena"
+  },
+  "fooddiary": {
+    "fooddiary": "Diario Alimentare",
+    "today": "Oggi",
+    "yesterday": "Ieri",
+    "newEntry": "Nuova Entry",
+    "dish": "Piatto",
+    "quantity": "Q.tà (g)",
+    "date": "Data",
+    "kcal": "Kcal",
+    "gg": "g",
+    "modify": "Modifica l'entry",
+    "remove": "Rimuovere questa entry?",
+    "fillAllFields": "Inserisci tutti i campi",
+    "carbs": "Carboidrati",
+    "proteins": "Proteine",
+    "toAssume": "Da assumere",
+    "overallKcal": "Kcal totali",
+    "fats": "Grassi",
+    "pasta": "Pasta",
+    "fish": "Pesce",
+    "meat": "Carne",
+    "salad": "Insalata",
+    "bread": "Pane",
+    "fruit": "Frutta",
+    "assumedKcal": "Kcal Assunte",
+    "exceededOf": "Sforato di"
+  },
+  "exercisediary": {
+    "exercisediary": "Diario Esercizi",
+    "mm": "mm",
+    "kcal_h": "Kcal/h",
+    "newEntry": "Nuova Entry",
+    "today": "Oggi",
+    "yesterday": "Ieri",
+    "date": "Data",
+    "exercise": "Esercizio",
+    "duration": "Durata (min)",
+    "remove": "Rimuovere questa entry?",
+    "modify": "Modifica l'entry",
+    "fillAllFields": "Inserisci tutti i campi",
+    "cycling": "Ciclismo",
+    "running": "Corsa",
+    "swimming": "Nuoto",
+    "walking": "Camminata",
+    "yoga": "Yoga",
+    "chartTitle": "Kcal bruciate per giorno",
+    "numOfsteps": "Num. passi"
+  },
+  "weightdiary": {
+    "weightdiary": "Diario Peso",
+    "newEntry": "Nuova Entry",
+    "modifyEntry": "Modifica Entry",
+    "date": "Data",
+    "weight": "Peso (kg)",
+    "fillAllFields": "Inserisci tutti i campi",
+    "weightHistory": "Storico Pesi"
+  },
+  "nav": {
+    "login": "Login",
+    "homepage": "Homepage",
+    "foodagenda": "Piano Nutrizionale",
+    "fooddiary": "Diario Alimentare",
+    "exercisediary": "Diario Esercizi",
+    "weightdiary": "Diario Peso",
+    "motivationalvideos": "Video Formativi",
+    "motivationalpdfs": "Pdf Formativi",
+    "logged": "Logged",
+    "logout": "Confermare il logout"
+  },
+  "error": {
+    "emptyFields": "Inserisci tutti i campi",
+    "wrongCredentials": "Credenziali non corrette",
+    "noConnection": "Nessuna connessione",
+    "generic": "Qualcosa è andato storto"
+  },
+  "days": {
+    "monday": "Lunedì",
+    "tuesday": "Martedì",
+    "wednesday": "Mercoledì",
+    "thursday": "Giovedì",
+    "friday": "Venerdì",
+    "saturday": "Sabato",
+    "sunday": "Domenica"
+  }
+}

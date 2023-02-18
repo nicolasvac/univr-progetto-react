@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/PatientDetails.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/PatientDetails.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useRef } from "react"
+import {
+    Grid,
+    CircularProgress,
+    Backdrop,
+    Container,
+    Typography,
+} from "@material-ui/core";
+import { useAuth } from "../contexts/AuthContext";
+import { makeStyles } from '@material-ui/core/styles';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: '100%',
+    },
+    heading: {
+        fontSize: theme.typography.pxToRem(15),
+        flexBasis: '33.33%',
+        flexShrink: 0,
+    },
+    secondaryHeading: {
+        fontSize: theme.typography.pxToRem(15),
+        color: theme.palette.text.secondary,
+    },
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff',
+    },
+}));
+
+/**
+ * @deprecated
+ * @param {object} props 
+ * @returns 
+ */
+export default function PatientDetails(props) {
+
+    const { patient } = props.location.state;
+    console.debug(props);
+
+    const { getPatient } = useAuth();
+
+    const classes = useStyles()
+
+    const [state, setState] = useState({
+        backdrop: false,
+        patient: {}
+    })
+
+    const [expanded, setExpanded] = React.useState(false);
+
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    }
+
+    const isMountedRef = useRef(null);
+    React.useEffect(() => {
+        const fetchData = async (patient_id) => {
+            if (isMountedRef.current)
+                setState(s => ({ ...s, backdrop: true }))
+
+            try {
+                let snapshot = await getPatient(patient_id);
+                let patient = snapshot.docs.map((doc) => {
+                    let data = doc.data();
+                    let id = doc.id;
+                    let patient = {
+                        appointments: data.appointments,
+                        dateOfBirth: data.dateOfBirth,
+                        email: data.email,
+                        gender: data.gender,
+                        id: id,
+                        name: data.name,
+                        surname: data.surname,
+                        height: data.height,
+                        therapyEndDate: data.therapyEndDate,
+                        therapyStartDate: data.therapyStartDate,
+                    }
+                    // console.debug(patient);
+                    return patient
+                })
+                console.debug(patient);
+                if (isMountedRef.current)
+                    setState((s) => ({ ...s, patient: patient, backdrop: false }))
+            } catch (error) {
+                console.error(error);
+                if (isMountedRef.current) {
+                    setState(s => ({ ...s, backdrop: false }))
+                }
+            }
+
+        }
+        isMountedRef.current = true
+        if (patient !== undefined)
+            fetchData(patient);
+        return () => (isMountedRef.current = false)
+    }, [patient])
+
+    const { backdrop } = state
+    if (backdrop)
+        return (
+            &lt;Backdrop open={backdrop} className={classes.backdrop}>
+                &lt;CircularProgress color="inherit" />
+            &lt;/Backdrop>
+        )
+
+    return (
+        &lt;Container maxWidth="md">
+            &lt;Grid container direction="row" spacing={2}>
+                &lt;Grid item xs={12}>
+                    &lt;Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+                        &lt;AccordionSummary
+                            expandIcon={&lt;ExpandMoreIcon />}
+                            aria-controls="panel1bh-content"
+                            id="panel1bh-header"
+                        >
+                            &lt;Typography className={classes.heading}>General settings&lt;/Typography>
+                            &lt;Typography className={classes.secondaryHeading}>I am an accordion&lt;/Typography>
+                        &lt;/AccordionSummary>
+                        &lt;AccordionDetails>
+                            &lt;Typography>
+                                Nulla facilisi.Phasellus sollicitudin nulla et quam mattis feugiat.Aliquam eget
+                                maximus est, id dignissim quam.
+                            &lt;/Typography>
+                        &lt;/AccordionDetails>
+                    &lt;/Accordion>
+                &lt;/Grid>
+            &lt;/Grid>
+        &lt;/Container>
+
+    )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#Account">Account</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#ForgotPassword">ForgotPassword</a></li><li><a href="global.html#NutritionalPlan">NutritionalPlan</a></li><li><a href="global.html#OtherDetails">OtherDetails</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#VisitPage">VisitPage</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 17 2021 19:20:11 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: contexts/AuthContext.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: contexts/AuthContext.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useContext, useState, useEffect } from "react"
+import { auth, db, analytics, storage } from "../services/firebase"
+import {
+    createUserWithEmailAndPassword,
+    setPersistence, signInWithEmailAndPassword, browserSessionPersistence,
+    signOut,
+    onAuthStateChanged,
+    sendPasswordResetEmail,
+    updateEmail as authUpdateEmail,
+    updatePassword as authUpdatePassword,
+    sendEmailVerification, updateProfile as authUpdateProfile
+} from "firebase/auth";
+import {
+    doc,
+    setDoc,
+    addDoc,
+    collection,
+    query, limit,
+    writeBatch, getDocs,
+    updateDoc, where,
+    deleteDoc, getDoc, deleteField, orderBy, collectionGroup
+} from "firebase/firestore";
+import { logEvent } from 'firebase/analytics';
+import { ref, getDownloadURL } from 'firebase/storage'
+import axios from 'axios'
+
+const AuthContext = React.createContext()
+
+export function useAuth() {
+    return useContext(AuthContext)
+}
+
+export function AuthProvider({ children }) {
+    const [currentUser, setCurrentUser] = useState()
+    const [loading, setLoading] = useState(true)
+
+    /**
+     * Given patient id returns list of executed workouts by the patient.
+     * @param {string} uid patient identificator
+     * @returns Promise
+     */
+    function getPatientWorkouts(patient_id) {
+        return getDocs(query(collection(db, `patients/${patient_id}/workout_entry`), orderBy("time")))
+    }
+
+    function verifyEmail() {
+        return sendEmailVerification(currentUser);
+    }
+
+    /**
+     * Update patient appointments.
+     * @param {array} appointments list of newest appointments
+     * @param {string} patient patient identificator
+     * @returns Promise
+     */
+    function updatePatientAppointments(appointments, patient) {
+        return updateDoc(doc(db, `patients`, patient), appointments)
+    }
+
+    function updatePatientWorkouts(workouts, patient) {
+        return (updateDoc(doc(db, 'patients', patient), workouts));
+    }
+
+    function updateNotification(body, patient_id, notification_id) {
+        return updateDoc(doc(db, `patients/${patient_id}/notifications`, notification_id), body);
+    }
+
+    function createNotification(body, patient_id) {
+        return setDoc(doc(collection(db, `patients/${patient_id}/notifications`)), body);
+    }
+
+    function getNotifications(patient_id) {
+        // given patient id return all patient notifications
+        return getDocs(collection(db, `patients/${patient_id}/notifications`));
+    }
+
+    function sendNotification(body, token) {
+        const post_request = async (body, token) => {
+            return (
+                new Promise(async (resolve, reject) => {
+                    let completed = true;
+
+                    setTimeout(() => {
+                        if (!completed) {
+                            completed = true;
+                            return reject("timeout 5000")
+                        }
+                    }, 5000);
+
+                    try {
+
+                        let res = await axios.post('http://192.168.178.45:8080/notification',
+                            {
+                                body,
+                                "registrationToken": token,
+                            },
+                            {
+                                headers: { 'Content-Type': 'application/json' }
+                            })
+                        if (!completed) {
+                            completed = true;
+                            return resolve(res.data);
+                        }
+
+                    } catch (err) {
+                        if (!completed) {
+                            completed = true;
+                            return reject(err);
+                        }
+                    }
+                })
+            )
+        }
+
+        return post_request(body, token);
+    }
+
+    function getUrlNotificationIcon() {
+        return getDownloadURL(ref(storage, 'mobile/aovr.png'));
+    }
+
+    async function signup(email, password, { firstname, lastname }) {
+
+        const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+        logEvent(analytics, 'sign_up', { providerId: userCredentials.providerId });
+        /*const storageRef = ref(storage, 'doctors/' + uid + '/avatars/' + filename);
+        const metadata = { contentType: 'image/jpeg' }
+        const uploadTask = uploadBytesResumable(storageRef, file, metadata);
+        uploadTask.on('state_changed', (snapshot) => {
+            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+            switch (snapshot.state) {
+                case 'paused':
+                    console.log('Upload is paused');
+                    break;
+                case 'running':
+                    console.log('Upload is running');
+                    break;
+            }
+        },
+            (error) => {
+                // A full list of error codes is available at
+                // https://firebase.google.com/docs/storage/web/handle-errors
+                switch (error.code) {
+                    case 'storage/unauthorized':
+                        // User doesn't have permission to access the object
+                        break;
+                    case 'storage/canceled':
+                        // User canceled the upload
+                        break;
+
+                    // ...
+
+                    case 'storage/unknown':
+                        // Unknown error occurred, inspect error.serverResponse
+                        break;
+                }
+            },
+            () => {
+                // Upload completed successfully, now we can get the download URL
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    console.log('File available at', downloadURL);
+                });
+            });*/
+
+        return authUpdateProfile(userCredentials.user, { displayName: `${firstname} ${lastname}` });
+    }
+
+    function getPatientNutritionalPlan(uid) {
+        return getDocs(collection(db, `patients/${uid}/nutritional_plans`));
+    }
+
+    function getFoods() {
+        return getDocs(query(collection(db, "foods"), orderBy('name', 'asc')));
+    }
+
+    /**
+     * 
+     * @param {string} collection_path Collection path.
+     * @returns Firestore Document Reference with generated unique id.
+     */
+    function newDocRef(collection_path) {
+        return doc(collection(db, collection_path))
+    }
+
+    function createPatientNutritionalPlan(docRef, data) {
+        return setDoc(docRef, data);
+    }
+
+    function updatePatNutPlan(data, patient_id, doc_id) {
+        return updateDoc(doc(db, `patients/${patient_id}/nutritional_plans`, doc_id), data);
+    }
+
+    function updatePatientNutritionalPlan(data, patient_id, doc_id) {
+        return setDoc(doc(db, `patients/${patient_id}/nutritional_plans`, doc_id), data);
+    }
+
+    function updateProfile(data) {
+        return authUpdateProfile(currentUser, data);
+    }
+
+    function getFoodEntries(patient_id) {
+        return getDocs(query(collection(db, `patients/${patient_id}/food_entry`), orderBy("time")));
+    }
+
+    function updateWorkoutEntry(uid, data) {
+        return updateDoc(doc(db, "workout_entry", uid), data);
+    }
+
+    function removeWorkoutEntry(uid) {
+        // given uid workout entry doc
+        return deleteDoc(doc(db, "workout_entry", uid));
+    }
+
+    function createWorkoutEntry(doc) {
+        // add new element
+        return addDoc(collection(db, "workout_entry"), doc);
+    }
+
+    function getPatients() {
+        // returns list of patients of signed doctor
+        return getDocs(query(collection(db, "patients"), where("doctorId", "==", currentUser.uid)))
+    }
+
+    function getPathologies() {
+        return getDocs(collection(db, "pathologies"));
+    }
+
+    function removePatient(uid) {
+        return deleteDoc(doc(db, "patients", uid));
+    }
+
+    function unlinkPatient(uid) {
+        return updateDoc(doc(db, "patients", uid), { doctorId: deleteField() });
+    }
+
+    function createPatient(data) {
+        // register new patient of this doctor
+        return addDoc(collection(db, "patients"),
+            {
+                ...data,
+                doctorId: currentUser.uid,
+                createdAt: new Date().toISOString()
+            }
+        );
+    }
+
+    function getPatient(patient_uid) {
+        return getDoc(doc(db, "patients", patient_uid));
+    }
+
+    function getWorkouts(rowsPerPage) {
+        // list of workouts on firestore db
+        return getDocs(query(collection(db, "workouts"), limit(rowsPerPage)))
+    }
+
+    function listWorkouts() {
+        return getDocs(collection(db, "workouts"));
+    }
+
+    function createWorkout(data) {
+        return addDoc(collection(db, "workouts"), data);
+    }
+
+    function updateWorkout(uid, data) {
+        return setDoc(doc(db, "workouts", uid), data);
+    }
+
+    function deleteInBatch(rows) {
+        const batch = writeBatch(db);
+        rows.forEach(row => batch.delete(doc(db, "workouts", row)));
+        return batch.commit();
+    }
+
+    async function login(email, password, rememberMe) {
+        if (!rememberMe) {
+            return setPersistence(auth, browserSessionPersistence).then(() => {
+                return signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredentials) => logEvent(analytics, 'login', { providerId: userCredentials.providerId }));
+            });
+        } else {
+            return signInWithEmailAndPassword(auth, email, password)
+                .then((userCredentials) => logEvent(analytics, 'login', { providerId: userCredentials.providerId }));
+        }
+    }
+
+    function logout() {
+        return signOut(auth)
+    }
+
+    function resetPassword(email) {
+        return sendPasswordResetEmail(auth, email)
+    }
+
+    function updateEmail(email) {
+        return authUpdateEmail(currentUser, email)
+    }
+
+    function updatePassword(password) {
+        return authUpdatePassword(currentUser, password)
+    }
+
+    function pushPatientVisitData(data, patient_id) {
+        const docRef = doc(db, `patients/${patient_id}/visits`, "first_visit");
+        return setDoc(docRef, data, { merge: true });
+    }
+
+    function pullPatientVisitData(patient_id) {
+        const docRef = doc(db, `patients/${patient_id}/visits`, "first_visit");
+        return getDoc(docRef);
+    }
+
+    function getPatientNotifications() {
+        // for each patient return all notifications
+        return getDocs(collectionGroup(db, 'notifications'))
+    }
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(
+            auth,
+            (user) => {
+                setCurrentUser(() => user)
+                setLoading(() => false)
+            },
+            (error) => console.error(error.message),
+            () => console.debug("Observer was removed")
+        )
+        return () => unsubscribe()
+    }, [])
+
+    const value = {
+        currentUser,
+        createPatient,
+        login,
+        signup,
+        logout,
+        resetPassword,
+        updateEmail,
+        updatePassword,
+        createWorkout,
+        updateWorkout,
+        getWorkouts,
+        deleteInBatch,
+        getPatientWorkouts,
+        getPatients,
+        getPatient,
+        removePatient,
+        unlinkPatient,
+        verifyEmail,
+        updateProfile,
+        updateWorkoutEntry,
+        createWorkoutEntry,
+        removeWorkoutEntry,
+        getPatientNutritionalPlan,
+        updatePatientNutritionalPlan,
+        updatePatNutPlan,
+        createPatientNutritionalPlan,
+        getFoods,
+        getFoodEntries,
+        newDocRef,
+        pushPatientVisitData,
+        pullPatientVisitData,
+        getUrlNotificationIcon,
+        sendNotification,
+        getNotifications,
+        createNotification,
+        updateNotification,
+        getPathologies,
+        listWorkouts,
+        updatePatientAppointments,
+        updatePatientWorkouts,
+        getPatientNotifications,
+    }
+
+    return (
+        &lt;AuthContext.Provider value={value}>
+            {!loading &amp;&amp; children}
+        &lt;/AuthContext.Provider>
+    )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#Account">Account</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#ForgotPassword">ForgotPassword</a></li><li><a href="global.html#NutritionalPlan">NutritionalPlan</a></li><li><a href="global.html#OtherDetails">OtherDetails</a></li><li><a href="global.html#Profile">Profile</a></li><li><a href="global.html#VisitPage">VisitPage</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Dec 17 2021 19:20:11 GMT+0100 (Central European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

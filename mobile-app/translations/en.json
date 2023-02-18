@@ -1,0 +1,113 @@
+{
+  "login": {
+    "password": "Password",
+    "username": "Username",
+    "login": "Login",
+    "email": "Email"
+  },
+  "homepage": {
+    "homepage": "Homepage",
+    "userInfo": "User info",
+    "nextAppointments": "Next appointments",
+    "whatToEatToday": "What to eat today",
+    "name": "Name",
+    "surname": "Surname",
+    "age": "Age",
+    "gender": "Gender",
+    "appointment": "Appointment",
+    "date": "Date"
+  },
+  "foodagenda": {
+    "foodagenda": "Food Agenda",
+    "today": "Today",
+    "breakfast": "Breakfast",
+    "morningBreak": "Morning Break",
+    "lunch": "Lunch",
+    "afternoonBreak": "Afternoon Break",
+    "dinner": "Dinner"
+  },
+  "fooddiary": {
+    "fooddiary": "Food Diary",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "newEntry": "New Entry",
+    "dish": "Dish",
+    "quantity": "Q.ty (g)",
+    "date": "Date",
+    "kcal": "Kcal",
+    "gg": "g",
+    "modify": "Modify your entry",
+    "remove": "Remove this entry?",
+    "fillAllFields": "Fill all fields",
+    "carbs": "Carbohydrates",
+    "proteins": "Proteins",
+    "fats": "Fats",
+    "toAssume": "To assume",
+    "overallKcal": "Overall Kcal",
+    "pasta": "Pasta",
+    "fish": "Fish",
+    "meat": "Meat",
+    "salad": "Salad",
+    "bread": "Bread",
+    "fruit": "Fruit",
+    "assumedKcal": "Assumed Kcal",
+    "exceededOf": "Exceeded of"
+  },
+  "exercisediary": {
+    "exercisediary": "Exercise Diary",
+    "m": "m",
+    "kcal_h": "Kcal/h",
+    "newEntry": "New Entry",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "date": "Date",
+    "exercise": "Exercise",
+    "duration": "Duration (min)",
+    "modify": "Modify your entry",
+    "remove": "Remove this entry?",
+    "fillAllFields": "Fill all fields",
+    "cycling": "Cycling",
+    "running": "Running",
+    "swimming": "Swimming",
+    "walking": "Walking",
+    "yoga": "Yoga",
+    "chartTitle": "Burnt Kcal per day",
+    "numOfsteps": "Num. of Steps"
+  },
+  "weightdiary": {
+    "weightdiary": "Weight Diary",
+    "newEntry": "New Entry",
+    "modifyEntry": "Modify your entry",
+    "date": "Date",
+    "weight": "Weight (Kg)",
+    "fillAllFields": "Fill all fields",
+    "weightHistory": "Weight History"
+  },
+  "nav": {
+    "login": "Login",
+    "homepage": "Homepage",
+    "foodagenda": "Food Agenda",
+    "fooddiary": "Food Diary",
+    "exercisediary": "Exercise Diary",
+    "weightdiary": "Weight Diary",
+    "motivationalvideos": "Motivational Videos",
+    "motivationalpdfs": "Motivational Pdfs",
+    "logged": "Logged",
+    "logout": "Do you really want to logout?"
+  },
+  "error": {
+    "emptyFields": "Fill all fields",
+    "wrongCredentials": "Wrong credentials",
+    "noConnection": "No connection",
+    "generic": "Something went wrong"
+  },
+  "days": {
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thusday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  }
+}

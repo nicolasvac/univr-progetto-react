@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  backend:
+    container_name: app_progetto_backend
+    image: docker-jp-backend:latest
+    tty: true
+    ports:
+      - "0.0.0.0:5001:5000/tcp"
