@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,7 +6,7 @@ import {
   Pressable,
   SafeAreaView,
   FlatList,
-  ScrollView,
+  ScrollView, Alert,
 } from 'react-native';
 import color from '../color';
 import {Divider} from 'react-native-elements';
@@ -18,17 +18,24 @@ import Pause from '../icons/pause.svg';
 import Dot from '../icons/dry-clean.svg';
 import {useTranslation} from 'react-i18next';
 
-import YoutubePlayer from 'react-native-youtube-iframe';
+// teniamo l'import di YoutubeIframeRef per il commento sulla variabile e intellisense
+// eslint-disable-next-line no-unused-vars
+import YoutubePlayer, {YoutubeIframeRef} from 'react-native-youtube-iframe';
 import {get, logout} from '../api/restManager';
 import LogoutOverlay from '../components/LogoutOverlay';
 
 export default function MotivationalVideos({navigation}) {
   const {t} = useTranslation();
 
+  /**
+   * Utilizziamo questa variabile per mantenere una referenza con il video player,
+   * e consentirci d'inviare comandi a componente montato.
+   * @type {React.MutableRefObject<YoutubeIframeRef>}
+   */
+  const videoPlayerRef = useRef(null);
+
   const [overlayLogoutVisible, setOverlayLogoutVisible] = useState(false);
-
   const [playing, setPlaying] = useState(false);
-
   const [videoId, setVideoId] = useState('');
   const [videos, setVideos] = useState([]);
 
@@ -39,7 +46,9 @@ export default function MotivationalVideos({navigation}) {
   const handleLogout = async () => {
     try {
       await logout((navigation = {navigation}));
-    } catch (err) {}
+    } catch (err) {
+      console.log('IMPOSSIBILE GESTIRE ERRORE LOGOUT', err);
+    }
   };
 
   async function getData() {
@@ -59,10 +68,17 @@ export default function MotivationalVideos({navigation}) {
     }
   }
 
-  const setData = ({videosData}) => {
+  const setData = videosData => {
     let d0 = [];
 
-    videosData.forEach(element => {
+    console.log('RISPOSTA SUI VIDEO', videosData);
+
+    // In caso di refresh, se non abbiamo dati non visualizzare errori.
+    if (videosData == null) {
+      return;
+    }
+
+    videosData.videos.forEach(element => {
       let new_item = {
         id: element.id,
         link: element.video_link,
@@ -79,9 +95,94 @@ export default function MotivationalVideos({navigation}) {
     setVideos(d0);
   };
 
-  const renderItemList = ({item, index}) => (
-    <ItemList title={item.title} index={index} id={item.id} link={item.link} />
-  );
+  const toggleOverlayLogOut = () => {
+    setOverlayLogoutVisible(!overlayLogoutVisible);
+  };
+
+  const togglePlaying = () => {
+    setPlaying(prev => !prev);
+  };
+
+  /**
+   * Questa funzione ci consente di sapere se il video player è stato caricato
+   * e visualizzato come componente react.
+   * @returns {boolean} False se non caricato
+   */
+  const isVideoPlayerAvailable = () => {
+    return videoPlayerRef != null && videoPlayerRef.current != null;
+  };
+
+  /**
+   * Questa funzione ritorna il riferimento al video player
+   * se caricato nel componente. Sostituisce l'uso diretto della variabile
+   * videoPlayerRef per evitare di dover scrivere sempre ".current",
+   * inoltre aiuta l'ide a sapere i tipi.
+   * @returns {YoutubeIframeRef|null} Null se non caricato
+   */
+  const getVideoPlayerRef = () => {
+    // Se non abbiamo a disposizione ancora il player (il componente sta ancora caricando),
+    // non diamo la possibilità all'utente di eseguire funzioni.
+    if (isVideoPlayerAvailable()) {
+      return videoPlayerRef.current;
+    } else {
+      return null;
+    }
+  };
+
+  const changeVideoPlayerTime = async time => {
+    // Verifica che il parametro inviato sia effettivamente un numero.
+    if (isNaN(time)) {
+      Alert.alert(
+        'Errore',
+        'Errore interno. Il tempo selezionato non è valido. Riprova.',
+      );
+      return;
+    }
+
+    // Ottieni il riferimento al video player.
+    const videoPlayer = getVideoPlayerRef();
+
+    if (videoPlayer == null) {
+      Alert.alert(
+        'Errore!',
+        'Errore interno. Attendere la visualizzazione completa del video player. Riprova.',
+      );
+      return;
+    }
+
+    // Ottieni il tempo di durata del video (in secondi)
+    const totalVideoTime = await videoPlayer.getDuration();
+
+    // Ottieni il tempo corrente del video (in secondi)
+    const currentVideoTime = await videoPlayer.getCurrentTime();
+
+    // Calcola il nuovo tempo a cui mandare il player
+    const newVideoTime = currentVideoTime + time;
+
+    if (newVideoTime >= totalVideoTime) {
+      // Se il nuovo tempo a cui mandare il player supera la durata totale del video,
+      // procediamo a far terminare il video direttamente.
+      videoPlayer.seekTo(totalVideoTime);
+      setPlaying(false);
+    } else if (newVideoTime <= 0) {
+      // Se il nuovo tempo a cui mandare il player è inferiore o uguale a zero,
+      // facciamo ripartire il video dall'inizio.
+      videoPlayer.seekTo(0);
+    } else {
+      // Se nessuno dei casi precedenti è vero, semplicemente cambiamo il tempo del video.
+      videoPlayer.seekTo(newVideoTime);
+    }
+  };
+
+  const changeVideoLinkPlaying = newVideoLink => {
+    const newVideoId =
+      newVideoLink.split('/')[2] === 'youtu.be'
+        ? newVideoLink.split('/')[3]
+        : newVideoLink.split('v=')[1];
+
+    setVideoId(newVideoId);
+    setPlaying(true);
+  };
 
   const ItemList = ({title, id, link, index}) => (
     <>
@@ -94,32 +195,26 @@ export default function MotivationalVideos({navigation}) {
             marginTop={5}
             flexDirection={'row'}
             justifyContent={'space-between'}>
-            <Dot style={styles.itemIcon} fill={color.black} />
+            <Dot style={styles.itemIcon} fill={color.black}/>
             <Text style={styles.itemTextLong}>{title}</Text>
             <Pressable
               onPress={() => {
-                link.split('/')[2] === 'youtu.be'
-                  ? setVideoId(link.split('/')[3])
-                  : setVideoId(link.split('v=')[1]);
-                setPlaying(true);
+                console.log('CAMBIO VIDEO IN', id, link);
+                changeVideoLinkPlaying(link);
               }}
               android_ripple={{color: color.lightBlue, borderless: true}}>
-              <Play style={styles.itemIconPlay} />
+              <Play style={styles.itemIconPlay}/>
             </Pressable>
           </View>
         </View>
       </View>
-      <Divider orientation="horizontal" />
+      <Divider orientation="horizontal"/>
     </>
   );
 
-  const toggleOverlayLogOut = () => {
-    setOverlayLogoutVisible(!overlayLogoutVisible);
-  };
-
-  const togglePlaying = () => {
-    setPlaying(prev => !prev);
-  };
+  const renderItemList = ({item, index}) => (
+    <ItemList title={item.title} index={index} id={item.id} link={item.link}/>
+  );
 
   return (
     <>
@@ -128,13 +223,13 @@ export default function MotivationalVideos({navigation}) {
           <Pressable
             onPress={() => navigation.openDrawer()}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Hamburger style={styles.topBarIcon} />
+            <Hamburger style={styles.topBarIcon}/>
           </Pressable>
           <Text style={styles.topBarText}>{t('nav:motivationalvideos')}</Text>
           <Pressable
             onPress={toggleOverlayLogOut}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Logout style={styles.topBarIcon} />
+            <Logout style={styles.topBarIcon}/>
           </Pressable>
         </View>
 
@@ -150,7 +245,12 @@ export default function MotivationalVideos({navigation}) {
                 // handle or ignore
               }}>
               <View pointerEvents="none">
-                <YoutubePlayer height={250} play={playing} videoId={videoId} />
+                <YoutubePlayer
+                  ref={videoPlayerRef}
+                  height={250}
+                  play={playing}
+                  videoId={videoId}
+                />
               </View>
             </Pressable>
           </View>
@@ -170,9 +270,9 @@ export default function MotivationalVideos({navigation}) {
               alignItems={'center'}
               margin={10}>
               {playing ? (
-                <Pause height={'25'} width={'40'} fill={'white'} />
+                <Pause height={'25'} width={'40'} fill={'white'}/>
               ) : (
-                <Play height={'25'} width={'40'} fill={'white'} />
+                <Play height={'25'} width={'40'} fill={'white'}/>
               )}
             </Pressable>
           </View>
