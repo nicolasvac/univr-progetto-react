@@ -209,16 +209,16 @@ export default function MotivationalVideos({navigation}) {
     } else if (newVideoTime <= 0) {
       // Se il nuovo tempo a cui mandare il player è inferiore o uguale a zero,
       // facciamo ripartire il video dall'inizio.
+      // Il listener del current time si occuperà poi di aggiornare anche la UI.
       videoPlayer.seekTo(0);
-      //setVideoCurrentTime(0);
 
       if (!playing) {
         setPlaying(true);
       }
     } else {
       // Se nessuno dei casi precedenti è vero, semplicemente cambiamo il tempo del video.
+      // Il listener del current time si occuperà poi di aggiornare anche la UI.
       videoPlayer.seekTo(newVideoTime);
-      //setVideoCurrentTime(newVideoTime);
     }
   };
 
