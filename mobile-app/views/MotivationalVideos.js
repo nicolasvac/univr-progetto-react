@@ -293,9 +293,12 @@ export default function MotivationalVideos({navigation}) {
   );
 
   // Calcola dinamicamente l'altezza del video player.
-  // Teniamo sempre un minimo di 200px come richiesto da specifiche della libreria.
-  // Se possibile, un quarto dell'altezza rende il player carino.
-  const videoPlayerHeight = Math.min(Dimensions.get('screen').height / 4, 200);
+  // Teniamo sempre un minimo di 250px come richiesto da specifiche della libreria.
+  // Se possibile, cerchiamo sempre di avere una risoluzione 16:9.
+  const videoPlayerHeight = Math.min(
+    (Dimensions.get('window').width / 16) * 9,
+    250,
+  );
 
   /**
    * Questa funzione viene utilizzata per far partire un intervallo che ogni 500ms
