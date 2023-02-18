@@ -44,6 +44,11 @@ export default function MotivationalVideos({navigation}) {
   const [videoCurrentTime, setVideoCurrentTime] = useState(0);
   const [currentVideoLink, setCurrentVideoLink] = useState(0);
 
+  /**
+   * Variabile utilizzata per tenere traccia dell'interval per aggiornare
+   * il tempo corrente del video.
+   * @type {number|null}
+   */
   let videoCurrentTimeInterval = null;
 
   useEffect(() => {
@@ -244,6 +249,14 @@ export default function MotivationalVideos({navigation}) {
     console.log('NUOVO TEMPO TOTALE VIDEO', newVideoTotalTime);
   };
 
+  /**
+   * Questa funzione viene utilizzata da FlexList per renderizzare il componente
+   * del video. In particolare, una sorta di ListTile che fa vedere il nome del video
+   * e consente di riprodurlo.
+   * @param {object} item
+   * @param {number} index
+   * @returns {JSX.Element}
+   */
   const renderItemList = ({item, index}) => (
     <ItemList
       item={item}
@@ -294,6 +307,8 @@ export default function MotivationalVideos({navigation}) {
    * @param state
    */
   const videoPlayerOnChangeState = state => {
+    console.log('CAMBIO STATE DEL VIDEO PLAYER', state);
+
     switch (state) {
       case 'buffering':
       case 'paused':
@@ -314,13 +329,13 @@ export default function MotivationalVideos({navigation}) {
           <Pressable
             onPress={() => navigation.openDrawer()}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Hamburger style={styles.topBarIcon} />
+            <Hamburger style={styles.topBarIcon}/>
           </Pressable>
           <Text style={styles.topBarText}>{t('nav:motivationalvideos')}</Text>
           <Pressable
             onPress={toggleOverlayLogOut}
             android_ripple={{color: color.edalabBlue, borderless: false}}>
-            <Logout style={styles.topBarIcon} />
+            <Logout style={styles.topBarIcon}/>
           </Pressable>
         </View>
 
