@@ -243,7 +243,7 @@ export default function MotivationalVideos({navigation}) {
    * La funzione provvederà a estrarre il l'id del video automaticamente.
    * A ogni cambio di video viene fatto partire il timer che monitora
    * il tempo corrente del video.
-   * @param {string} newVideoLink
+   * @param {string} newVideoLink Il link del video youtube
    */
   const changeVideoLinkPlaying = newVideoLink => {
     stopCurrentTimeInterval();
@@ -277,8 +277,8 @@ export default function MotivationalVideos({navigation}) {
    * Questa funzione viene utilizzata da FlexList per renderizzare il componente
    * del video. In particolare, una sorta di ListTile che fa vedere il nome del video
    * e consente di riprodurlo.
-   * @param {object} item
-   * @param {number} index
+   * @param {object} item L'oggetto contenente i dettagli del video
+   * @param {number} index L'indice dell'elemento all'interno della lista
    * @returns {JSX.Element}
    */
   const renderItemList = ({item, index}) => (
@@ -334,7 +334,7 @@ export default function MotivationalVideos({navigation}) {
 
   /**
    * Questa funzione viene utilizzata per gestire gli stati del video player.
-   * @param {string} state
+   * @param {string} state Lo stato corrente del video player
    */
   const videoPlayerOnChangeState = state => {
     console.log('CAMBIO STATE DEL VIDEO PLAYER', state);

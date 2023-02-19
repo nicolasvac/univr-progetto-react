@@ -60,9 +60,9 @@ function VideoControls(props) {
         alignItems={'center'}
         margin={10}>
         {isPlaying ? (
-          <PauseIcon height={'25'} width={'40'} fill={'black'}/>
+          <PauseIcon height={'25'} width={'40'} fill={'black'} />
         ) : (
-          <PlayIcon height={'25'} width={'40'} fill={'black'}/>
+          <PlayIcon height={'25'} width={'40'} fill={'black'} />
         )}
       </Pressable>
       <Pressable
